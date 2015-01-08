@@ -1,0 +1,100 @@
+{
+  "type": "MODULE",
+  "scriptItemList": [
+    {
+      "type": "CLASS_DECLARATION",
+      "name": {
+        "type": "BINDING_IDENTIFIER",
+        "identifierToken": {
+          "type": "identifier",
+          "value": "Some"
+        }
+      },
+      "superClass": null,
+      "elements": [
+        {
+          "type": "PROPERTY_METHOD_ASSIGNMENT",
+          "isStatic": false,
+          "functionKind": null,
+          "name": {
+            "type": "LITERAL_PROPERTY_NAME",
+            "literalToken": {
+              "type": "identifier",
+              "value": "constructor"
+            }
+          },
+          "parameterList": {
+            "type": "FORMAL_PARAMETER_LIST",
+            "parameters": []
+          },
+          "typeAnnotation": null,
+          "annotations": [],
+          "body": {
+            "type": "FUNCTION_BODY",
+            "statements": [
+              {
+                "type": "EXPRESSION_STATEMENT",
+                "expression": {
+                  "type": "CALL_EXPRESSION",
+                  "operand": {
+                    "type": "MEMBER_EXPRESSION",
+                    "operand": {
+                      "type": "IDENTIFIER_EXPRESSION",
+                      "identifierToken": {
+                        "type": "identifier",
+                        "value": "console"
+                      }
+                    },
+                    "memberName": {
+                      "type": "identifier",
+                      "value": "info"
+                    }
+                  },
+                  "args": {
+                    "type": "ARGUMENT_LIST",
+                    "args": [
+                      {
+                        "type": "LITERAL_EXPRESSION",
+                        "literalToken": {
+                          "type": "string literal",
+                          "value": "'Barev'"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "annotations": [],
+      "typeParameters": null
+    },
+    {
+      "type": "EXPRESSION_STATEMENT",
+      "expression": {
+        "type": "NEW_EXPRESSION",
+        "operand": {
+          "type": "IDENTIFIER_EXPRESSION",
+          "identifierToken": {
+            "type": "identifier",
+            "value": "Some"
+          }
+        },
+        "args": {
+          "type": "ARGUMENT_LIST",
+          "args": []
+        }
+      }
+    },
+    {
+      "type": "RETURN_STATEMENT",
+      "expression": {
+        "type": "OBJECT_LITERAL_EXPRESSION",
+        "propertyNameAndValues": []
+      }
+    }
+  ],
+  "moduleName": null
+}

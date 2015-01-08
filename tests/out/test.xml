@@ -1,0 +1,25 @@
+<Module>
+  <FunctionDeclaration>
+    <Token type="function"/>
+    <Identifier>
+      <Token type="«identifier»">a</Token>
+    </Identifier>
+    <FormalSignature>
+      <Token type="("/>
+      <Token type=")"/>
+    </FormalSignature>
+    <BlockStatement>
+      <Token type="{"/>
+      <ExpressionStatement>
+        <UnaryExpression>
+          <Token type="await"/>
+          <Identifier>
+            <Token type="«identifier»">hello</Token>
+          </Identifier>
+        </UnaryExpression>
+        <Token type=";"/>
+      </ExpressionStatement>
+      <Token type="}"/>
+    </BlockStatement>
+  </FunctionDeclaration>
+</Module>

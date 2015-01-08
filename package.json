@@ -1,0 +1,27 @@
+{
+  "name"          : "e6",
+  "version"       : "0.0.0",
+  "description"   : "Next Javascript Parser",
+  "author"        : {
+    "name"	      : "Sergey Mamyan",
+    "email"		  : "sergey.mamyan@gmail.com"
+  },
+  "license"       : "Apache License 2.0",
+  "homepage"      : "https://github.com/casser/es6",
+  "bugs"          : "https://github.com/cssser/es6/issues",
+  "keywords"      : [
+    "javascript",
+    "ecmascript",
+    "language",
+    "es5",
+    "es6",
+    "ES.next",
+    "harmony",
+    "compiler",
+    "transpiler"
+  ],
+  "repository"    : {
+    "type": "git",
+    "url": "https://github.com/cssser/es6"
+  }
+}
