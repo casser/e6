@@ -21,7 +21,6 @@ export class AstNode extends Entity {
     get last():AstNode{
         return this.children[this.children.length-1];
     }
-
     get range(){
         return [
             this.first?this.first.range[0]:NaN,

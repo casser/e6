@@ -32,22 +32,6 @@ class Main {
         }
         console.info(scanner.nextToken())
     }
-    static parse(){
-        var parser = new Parser({
-            source      : new Source({
-                name    : Main.SOURCE_NAME,
-                content : Main.SOURCE_FILE
-            }),
-            reporter    : new ErrorReporter(),
-            options     : new Options()
-        });
-        var tree = parser.parseModule().toXML();
-        console.info(tree);
-        Main.FS.writeFileSync(Main.SOURCE_TREE_XML,tree);
-        //Main.print(tree);
-        //Main.write(tree);
-    }
-
     static write(tree){
         var writer = new ParseTreeWriter(new Options());
         writer.visitAny(tree);
@@ -61,5 +45,5 @@ class Main {
     }
 }
 
-Main.parse();
+Main.scan();
 

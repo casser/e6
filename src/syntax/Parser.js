@@ -877,6 +877,25 @@ class Parser extends Entity {
         this.parseBlockStatement();
         return marker.done(Ast.FunctionExpression);
     }
+    parseTemplateExpression() {
+        var marker = this.mark(Ast.TemplateLiteralExpression);
+        if(this.is(Token.Type.TEMPLATE)){
+            this.eat(Token.Type.TEMPLATE);
+        }else
+        if(this.eatIf(Token.Type.TEMPLATE_HEAD)){
+            do{
+                this.parseExpression();
+                if(this.is(Token.Type.TEMPLATE_MIDDLE)){
+
+                    this.eat(Token.Type.TEMPLATE_MIDDLE);
+                }else
+                if(!this.is(Token.Type.TEMPLATE_TAIL)){
+                    this.eat(Token.Type.TEMPLATE_TAIL);
+                }
+            }while(!this.eatIf(Token.Type.TEMPLATE_TAIL));
+        }
+        return marker.done(Ast.TemplateLiteralExpression);
+    }
     parseRegexpExpression() {
         var marker = this.mark(Ast.RegexpExpression);
         this.eat(Token.Type.REGEXP);

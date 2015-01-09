@@ -132,7 +132,7 @@ class TokenType {
   get ERROR                      (){ return '«error»';            }
   get IDENTIFIER                 (){ return '«identifier»';       }
   get NUMBER                     (){ return '«number»';           }
-  get REGEXP         (){ return '«regexp»';           }
+  get REGEXP                     (){ return '«regexp»';           }
   get STRING                     (){ return '«string»';           }
   get TEMPLATE                   (){ return '«template»';         }
   get TEMPLATE_HEAD              (){ return '«template-head»';    }
@@ -256,6 +256,10 @@ export class Token extends Entity {
       case Token.Type.STRING:
       case Token.Type.REGEXP:
       case Token.Type.IDENTIFIER:
+      case Token.Type.TEMPLATE:
+      case Token.Type.TEMPLATE_HEAD:
+      case Token.Type.TEMPLATE_MIDDLE:
+      case Token.Type.TEMPLATE_TAIL:
         return true;
     }
     return false;

@@ -23,7 +23,8 @@ export class Scanner extends Entity {
             char             : null,
             currentToken     : null,
             lastToken        : null,
-            lookaheadToken   : null
+            lookaheadToken   : null,
+            tpl              : 0
         },settings));
         this.index = 0;
     }
@@ -48,7 +49,6 @@ export class Scanner extends Entity {
     get length(){
         return this.source.content.length;
     }
-
     set index(i) {
         this.$.index = i;
         this.$.lastToken = null;
@@ -58,7 +58,6 @@ export class Scanner extends Entity {
     get index() {
         return this.$.index;
     }
-
     get lastToken() {
         return this.$.lastToken;
     }
@@ -69,20 +68,6 @@ export class Scanner extends Entity {
         }else{
             this.$.regexp = false;
         }
-    }
-    getPosition() {
-        return this.getPositionInternal(this.getOffset());
-    }
-
-    nextRegularExpressionLiteralToken() {
-        this.$.lastToken = this.nextRegularExpressionLiteralTokenInternal();
-        this.$.currentToken = this.scanToken();
-        return this.$.lastToken;
-    }
-    nextTemplateLiteralToken() {
-        var t = this.nextTemplateLiteralTokenInternal();
-        this.$.currentToken = this.scanToken();
-        return t;
     }
     nextCloseAngle() {
         switch (this.$.currentToken.type) {
@@ -114,40 +99,6 @@ export class Scanner extends Entity {
     }
 
 //private functions
-    getPositionInternal(offset) {
-        return this.table.getSourcePosition(offset);
-    }
-    getTokenRange(startOffset) {
-        return this.table.getSourceRange(startOffset, this.$.index);
-    }
-    getOffset() {
-        return this.$.currentToken ? this.$.currentToken.location.start.offset : this.$.index;
-    }
-    nextRegularExpressionLiteralTokenInternal() {
-        // We already passed the leading / or /= so subtract the length of the last
-        // token.
-        var beginIndex = this.$.index - this.$.currentToken.text.toString().length - this.$.lastToken.text.toString().length;
-        // body
-        // Also, check if we are done with the body in case we had /=/
-        if (!(this.$.currentToken.type == Token.Type.SLASH_EQUAL && this.$.char === 47) && !this.skipRegularExpressionBody()) {
-            return this.createToken(Token.Type.REGEXP, beginIndex);
-        }
-
-        // separating /
-
-        if (this.$.char !== 47) {  // /
-            this.reportError(`Expected '/' in regular expression literal got '${this.getTokenString(beginIndex)}'`);
-            return this.createToken(Token.Type.REGEXP, beginIndex)
-        }
-        this.next();
-
-        // flags (note: this supports future regular expression flags)
-        while (Unicode.isIdPartChar(this.$.char)) {
-            this.next();
-        }
-
-        return this.createToken(Token.Type.REGEXP, beginIndex)
-    }
     skipRegularExpressionBody() {
         if (!Unicode.isRegExpStartChar(this.$.char)) {
             this.reportError('Expected regular expression first char '+this.$.char);
@@ -236,14 +187,10 @@ export class Scanner extends Entity {
             this.reportError('Expected \'}\' after expression in template literal');
             return this.createToken(Token.Type.END_OF_FILE, this.$.index);
         }
-
-        if (this.$.currentToken.type !== Token.Type.CLOSE_CURLY) {
-            this.reportError('Expected \'}\' after expression in template literal');
-            return this.createToken(Token.Type.ERROR, this.$.index);
-        }
         return this.nextTemplateLiteralTokenShared(Token.Type.TEMPLATE_TAIL, Token.Type.TEMPLATE_MIDDLE);
     }
     nextTemplateLiteralTokenShared(endType, middleType) {
+        console.info("TPL",endType, middleType)
         var beginIndex = this.$.index;
 
         this.skipTemplateCharacter();
@@ -258,35 +205,20 @@ export class Scanner extends Entity {
         switch (this.$.char) {
             case  96:  // `
                 this.next();
+                if(endType==Token.Type.TEMPLATE_TAIL){
+                    this.$.tpl--;
+                }
                 return this.$.lastToken = this.createToken(endType, beginIndex-1);
             case 36:  // $
                 this.next();  // $
                 this.next();  // {
+                if(middleType==Token.Type.TEMPLATE_HEAD){
+                    this.$.tpl++;
+                }
                 return this.$.lastToken = this.createToken(middleType, beginIndex-1);
         }
     }
 
-    peekTokenNoLineTerminatorInternal() {
-        var t = this.peekToken();
-        var start = this.$.lastToken.location.end.offset;
-        var end = t.location.start.offset;
-        for (var i = start; i < end; i++) {
-            var code = this.input.charCodeAt(i);
-            if (Unicode.isLineTerminator(code))
-                return null;
-
-            // If we have a block comment we need to skip it since new lines inside
-            // the comment are not significant.
-            if (code === 47) {  // '/'
-                code = this.input.charCodeAt(++i);
-                // End of line comments always mean a new line is present.
-                if (code === 47)  // '/'
-                    return null;
-                i = this.input.indexOf('*/', i) + 2;
-            }
-        }
-        return t;
-    }
     skipWhitespace() {
         while (!this.isAtEndInternal() && this.peekWhitespace()) {
             this.next();
@@ -359,6 +291,9 @@ export class Scanner extends Entity {
             case 123:  // {
                 return this.createToken(Token.Type.OPEN_CURLY, beginIndex);
             case 125:  // }
+                if(this.$.tpl>0){
+                    return this.nextTemplateLiteralTokenInternal();
+                }
                 return this.createToken(Token.Type.CLOSE_CURLY, beginIndex);
             case 40:  // (
                 return this.createToken(Token.Type.OPEN_PAREN, beginIndex);

@@ -10,15 +10,19 @@
     </FormalSignature>
     <BlockStatement>
       <Token type="{"/>
-      <ExpressionStatement>
-        <UnaryExpression>
-          <Token type="await"/>
+      <VariableDeclaration>
+        <Token type="var"/>
+        <VariableDeclarator>
           <Identifier>
-            <Token type="«identifier»">hello</Token>
+            <Token type="«identifier»">a</Token>
           </Identifier>
-        </UnaryExpression>
+          <Token type="="/>
+          <TemplateLiteralExpression>
+            <Token type="«template»">`Head `</Token>
+          </TemplateLiteralExpression>
+        </VariableDeclarator>
         <Token type=";"/>
-      </ExpressionStatement>
+      </VariableDeclaration>
       <Token type="}"/>
     </BlockStatement>
   </FunctionDeclaration>
