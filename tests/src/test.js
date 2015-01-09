@@ -1,3 +1,3 @@
-function a(){
-    var a = `Head `;
+function a(s){
+
 }

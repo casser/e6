@@ -6,23 +6,43 @@
     </Identifier>
     <FormalSignature>
       <Token type="("/>
+      <FormalParameter>
+        <Identifier>
+          <Token type="«identifier»">s</Token>
+        </Identifier>
+      </FormalParameter>
       <Token type=")"/>
     </FormalSignature>
     <BlockStatement>
       <Token type="{"/>
-      <VariableDeclaration>
-        <Token type="var"/>
-        <VariableDeclarator>
-          <Identifier>
-            <Token type="«identifier»">a</Token>
-          </Identifier>
-          <Token type="="/>
-          <TemplateLiteralExpression>
-            <Token type="«template»">`Head `</Token>
-          </TemplateLiteralExpression>
-        </VariableDeclarator>
-        <Token type=";"/>
-      </VariableDeclaration>
+      <WhileStatement>
+        <Token type="while"/>
+        <Token type="("/>
+        <Identifier>
+          <Token type="«identifier»">a</Token>
+        </Identifier>
+        <Token type=")"/>
+        <BlockStatement>
+          <Token type="{"/>
+          <ThrowStatement>
+            <Token type="throw"/>
+            <BinaryExpression>
+              <NumberExpression>
+                <Token type="«number»">1</Token>
+              </NumberExpression>
+              <Token type="+"/>
+              <NumberExpression>
+                <Token type="«number»">5</Token>
+              </NumberExpression>
+            </BinaryExpression>
+            <Token type=";"/>
+          </ThrowStatement>
+          <EmptyStatement>
+            <Token type=";"/>
+          </EmptyStatement>
+          <Token type="}"/>
+        </BlockStatement>
+      </WhileStatement>
       <Token type="}"/>
     </BlockStatement>
   </FunctionDeclaration>

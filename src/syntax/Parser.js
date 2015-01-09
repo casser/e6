@@ -93,6 +93,14 @@ class Parser extends Entity {
             this.error(`Semi-colon expected got '${this.token.type}' ${this.token.ltb}`);
         }
     }
+    isSemi(){
+        switch (this.token.type) {
+            case Token.Type.SEMI_COLON  :
+            case Token.Type.END_OF_FILE :
+            case Token.Type.CLOSE_CURLY : return true;
+            default                     : return this.token.ltb;
+        }
+    }
     mark(node:Function):Marker{
         return this.builder.mark(node);
     }
@@ -296,6 +304,94 @@ class Parser extends Entity {
         }
         this.eat(Token.Type.CLOSE_CURLY);
         return marker.done(Ast.BlockStatement);
+    }
+    parseIfStatement(){
+        var marker = this.mark(Ast.IfStatement);
+        this.eat(Token.Type.IF);
+        this.eat(Token.Type.OPEN_PAREN);
+        this.parseExpression();
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.parseStatement();
+        if(this.eatIf(Token.Type.ELSE)){
+            this.parseStatement();
+        }
+        return marker.done(Ast.IfStatement);
+    }
+    parseWithStatement(){
+        var marker = this.mark(Ast.WithStatement);
+        this.eat(Token.Type.WITH);
+        this.eat(Token.Type.OPEN_PAREN);
+        this.parseExpression();
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.parseStatement();
+        return marker.done(Ast.WithStatement);
+    }
+    parseWhileStatement(){
+        var marker = this.mark(Ast.WhileStatement);
+        this.eat(Token.Type.WHILE);
+        this.eat(Token.Type.OPEN_PAREN);
+        this.parseExpression();
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.parseStatement();
+        return marker.done(Ast.WhileStatement);
+    }
+    parseDoWhileStatement(){
+        var marker = this.mark(Ast.DoWhileStatement);
+        this.eat(Token.Type.DO);
+        this.parseStatement();
+        this.eat(Token.Type.WHILE);
+        this.eat(Token.Type.OPEN_PAREN);
+        this.parseExpression();
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.eatIf(Token.Type.SEMI_COLON);
+        return marker.done(Ast.DoWhileStatement);
+    }
+    parseReturnStatement(){
+        var marker = this.mark(Ast.ReturnStatement);
+        this.eat(Token.Type.RETURN);
+        if(!this.isSemi()){
+            this.parseExpression();
+        }
+        this.eatSemi();
+        return marker.done(Ast.ReturnStatement);
+    }
+    parseThrowStatement(){
+        var marker = this.mark(Ast.ThrowStatement);
+        this.eat(Token.Type.THROW);
+        if(!this.isSemi()){
+            this.parseExpression();
+        }
+        this.eatSemi();
+        return marker.done(Ast.ThrowStatement);
+    }
+    parseBreakStatement(){
+        var marker = this.mark(Ast.BreakStatement);
+        this.eat(Token.Type.BREAK);
+        if(!this.isSemi()){
+            this.eatIf(Token.Type.IDENTIFIER);
+        }
+        this.eatSemi();
+        return marker.done(Ast.BreakStatement);
+    }
+    parseContinueStatement(){
+        var marker = this.mark(Ast.ContinueStatement);
+        this.eat(Token.Type.CONTINUE);
+        if(!this.isSemi()){
+            this.eatIf(Token.Type.IDENTIFIER);
+        }
+        this.eatSemi();
+        return marker.done(Ast.ContinueStatement);
+    }
+    parseDebuggerStatement(){
+        var marker = this.mark(Ast.DebuggerStatement);
+        this.eat(Token.Type.DEBUGGER);
+        this.eatSemi();
+        return marker.done(Ast.DebuggerStatement);
+    }
+    parseEmptyStatement(){
+        var marker = this.mark(Ast.EmptyStatement);
+        this.eat(Token.Type.SEMI_COLON);
+        return marker.done(Ast.EmptyStatement);
     }
     //</editor-fold>
     //<editor-fold desc="Declarations">
