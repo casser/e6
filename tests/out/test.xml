@@ -1,49 +1,840 @@
 <Module>
-  <FunctionDeclaration>
-    <Token type="function"/>
-    <Identifier>
-      <Token type="«identifier»">a</Token>
-    </Identifier>
-    <FormalSignature>
-      <Token type="("/>
-      <FormalParameter>
-        <Identifier>
-          <Token type="«identifier»">s</Token>
-        </Identifier>
-      </FormalParameter>
-      <Token type=")"/>
-    </FormalSignature>
-    <BlockStatement>
-      <Token type="{"/>
-      <WhileStatement>
-        <Token type="while"/>
-        <Token type="("/>
-        <Identifier>
-          <Token type="«identifier»">a</Token>
-        </Identifier>
-        <Token type=")"/>
-        <BlockStatement>
-          <Token type="{"/>
-          <ThrowStatement>
-            <Token type="throw"/>
-            <BinaryExpression>
-              <NumberExpression>
-                <Token type="«number»">1</Token>
-              </NumberExpression>
-              <Token type="+"/>
-              <NumberExpression>
-                <Token type="«number»">5</Token>
-              </NumberExpression>
-            </BinaryExpression>
-            <Token type=";"/>
-          </ThrowStatement>
-          <EmptyStatement>
-            <Token type=";"/>
-          </EmptyStatement>
-          <Token type="}"/>
-        </BlockStatement>
-      </WhileStatement>
-      <Token type="}"/>
-    </BlockStatement>
-  </FunctionDeclaration>
+  <ImportDeclaration>
+    <Token type="import"/>
+    <Token type="{"/>
+    <ImportSpecifier>
+      <Identifier>
+        <Token type="«identifier»">Entity</Token>
+      </Identifier>
+    </ImportSpecifier>
+    <Token type="}"/>
+    <Token type="from"/>
+    <ModuleSpecifier>
+      <Token type="«string»">'util'</Token>
+    </ModuleSpecifier>
+    <Token type=";"/>
+  </ImportDeclaration>
+  <ImportDeclaration>
+    <Token type="import"/>
+    <Token type="{"/>
+    <ImportSpecifier>
+      <Identifier>
+        <Token type="«identifier»">Unicode</Token>
+      </Identifier>
+    </ImportSpecifier>
+    <Token type="}"/>
+    <Token type="from"/>
+    <ModuleSpecifier>
+      <Token type="«string»">'unicode'</Token>
+    </ModuleSpecifier>
+    <Token type=";"/>
+  </ImportDeclaration>
+  <ExportDeclaration>
+    <Token type="export"/>
+    <ClassDeclaration>
+      <Token type="class"/>
+      <Identifier>
+        <Token type="«identifier»">Source</Token>
+      </Identifier>
+      <Token type="extends"/>
+      <Identifier>
+        <Token type="«identifier»">Entity</Token>
+      </Identifier>
+      <ClassBody>
+        <Token type="{"/>
+        <ClassMethod>
+          <Identifier>
+            <Token type="«identifier»">constructor</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <FormalParameter>
+              <Identifier>
+                <Token type="«identifier»">settings</Token>
+              </Identifier>
+            </FormalParameter>
+            <Token type=")"/>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <ExpressionStatement>
+              <CallExpression>
+                <SuperExpression>
+                  <Token type="super"/>
+                </SuperExpression>
+                <ArgumentList>
+                  <Token type="("/>
+                  <CallExpression>
+                    <MemberExpression>
+                      <Identifier>
+                        <Token type="«identifier»">Source</Token>
+                      </Identifier>
+                      <Token type="."/>
+                      <Identifier>
+                        <Token type="«identifier»">merge</Token>
+                      </Identifier>
+                    </MemberExpression>
+                    <ArgumentList>
+                      <Token type="("/>
+                      <ObjectExpression>
+                        <Token type="{"/>
+                        <ObjectProperty>
+                          <Token type="«identifier»">lastLine</Token>
+                          <Token type=":"/>
+                          <NumberExpression>
+                            <Token type="«number»">0</Token>
+                          </NumberExpression>
+                        </ObjectProperty>
+                        <Token type=","/>
+                        <ObjectProperty>
+                          <Token type="«identifier»">lastOffset</Token>
+                          <Token type=":"/>
+                          <UnaryExpression>
+                            <Token type="-"/>
+                            <NumberExpression>
+                              <Token type="«number»">1</Token>
+                            </NumberExpression>
+                          </UnaryExpression>
+                        </ObjectProperty>
+                        <Token type="}"/>
+                      </ObjectExpression>
+                      <Token type=","/>
+                      <Identifier>
+                        <Token type="«identifier»">settings</Token>
+                      </Identifier>
+                      <Token type=")"/>
+                    </ArgumentList>
+                  </CallExpression>
+                  <Token type=")"/>
+                </ArgumentList>
+              </CallExpression>
+              <Token type=";"/>
+            </ExpressionStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassMethod>
+        <ClassGetter>
+          <Token type="get"/>
+          <Identifier>
+            <Token type="«identifier»">name</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <Token type=")"/>
+            <Token type=":"/>
+            <TypeReference>
+              <Identifier>
+                <Token type="«identifier»">String</Token>
+              </Identifier>
+            </TypeReference>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <ReturnStatement>
+              <Token type="return"/>
+              <MemberExpression>
+                <MemberExpression>
+                  <ThisExpression>
+                    <Token type="this"/>
+                  </ThisExpression>
+                  <Token type="."/>
+                  <Identifier>
+                    <Token type="«identifier»">$</Token>
+                  </Identifier>
+                </MemberExpression>
+                <Token type="."/>
+                <Identifier>
+                  <Token type="«identifier»">name</Token>
+                </Identifier>
+              </MemberExpression>
+            </ReturnStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassGetter>
+        <ClassGetter>
+          <Token type="get"/>
+          <Identifier>
+            <Token type="«identifier»">content</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <Token type=")"/>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <ReturnStatement>
+              <Token type="return"/>
+              <MemberExpression>
+                <MemberExpression>
+                  <ThisExpression>
+                    <Token type="this"/>
+                  </ThisExpression>
+                  <Token type="."/>
+                  <Identifier>
+                    <Token type="«identifier»">$</Token>
+                  </Identifier>
+                </MemberExpression>
+                <Token type="."/>
+                <Identifier>
+                  <Token type="«identifier»">content</Token>
+                </Identifier>
+              </MemberExpression>
+            </ReturnStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassGetter>
+        <ClassGetter>
+          <Token type="get"/>
+          <Identifier>
+            <Token type="«identifier»">table</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <Token type=")"/>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <ExpressionStatement>
+              <CallExpression>
+                <MemberExpression>
+                  <Identifier>
+                    <Token type="«identifier»">Object</Token>
+                  </Identifier>
+                  <Token type="."/>
+                  <Identifier>
+                    <Token type="«identifier»">defineProperty</Token>
+                  </Identifier>
+                </MemberExpression>
+                <ArgumentList>
+                  <Token type="("/>
+                  <ThisExpression>
+                    <Token type="this"/>
+                  </ThisExpression>
+                  <Token type=","/>
+                  <StringExpression>
+                    <Token type="«string»">'table'</Token>
+                  </StringExpression>
+                  <Token type=","/>
+                  <ObjectExpression>
+                    <Token type="{"/>
+                    <ObjectProperty>
+                      <Token type="«identifier»">value</Token>
+                      <Token type=":"/>
+                      <CallExpression>
+                        <ParenExpression>
+                          <Token type="("/>
+                          <ArrowFunctionExpression>
+                            <FormalSignature>
+                              <Token type="("/>
+                              <FormalParameter>
+                                <Identifier>
+                                  <Token type="«identifier»">source</Token>
+                                </Identifier>
+                              </FormalParameter>
+                              <Token type=")"/>
+                            </FormalSignature>
+                            <Token type="=>"/>
+                            <BlockStatement>
+                              <Token type="{"/>
+                              <VariableDeclaration>
+                                <Token type="var"/>
+                                <VariableDeclarator>
+                                  <Identifier>
+                                    <Token type="«identifier»">offsets</Token>
+                                  </Identifier>
+                                  <Token type="="/>
+                                  <ArrayExpression>
+                                    <Token type="["/>
+                                    <ArrayElement>
+                                      <NumberExpression>
+                                        <Token type="«number»">0</Token>
+                                      </NumberExpression>
+                                    </ArrayElement>
+                                    <Token type="]"/>
+                                  </ArrayExpression>
+                                </VariableDeclarator>
+                                <Token type=";"/>
+                              </VariableDeclaration>
+                              <VariableDeclaration>
+                                <Token type="var"/>
+                                <VariableDeclarator>
+                                  <Identifier>
+                                    <Token type="«identifier»">k</Token>
+                                  </Identifier>
+                                  <Token type="="/>
+                                  <NumberExpression>
+                                    <Token type="«number»">1</Token>
+                                  </NumberExpression>
+                                </VariableDeclarator>
+                                <Token type=";"/>
+                              </VariableDeclaration>
+                              <ForStatement>
+                                <Token type="for"/>
+                                <Token type="("/>
+                                <ForSignature>
+                                  <VariableDeclaration>
+                                    <Token type="var"/>
+                                    <VariableDeclarator>
+                                      <Identifier>
+                                        <Token type="«identifier»">index</Token>
+                                      </Identifier>
+                                      <Token type="="/>
+                                      <NumberExpression>
+                                        <Token type="«number»">0</Token>
+                                      </NumberExpression>
+                                    </VariableDeclarator>
+                                  </VariableDeclaration>
+                                  <Token type=";"/>
+                                  <BinaryExpression>
+                                    <Identifier>
+                                      <Token type="«identifier»">index</Token>
+                                    </Identifier>
+                                    <Token type="<"/>
+                                    <MemberExpression>
+                                      <Identifier>
+                                        <Token type="«identifier»">source</Token>
+                                      </Identifier>
+                                      <Token type="."/>
+                                      <Identifier>
+                                        <Token type="«identifier»">length</Token>
+                                      </Identifier>
+                                    </MemberExpression>
+                                  </BinaryExpression>
+                                  <Token type=";"/>
+                                  <PostfixExpression>
+                                    <Identifier>
+                                      <Token type="«identifier»">index</Token>
+                                    </Identifier>
+                                    <Token type="++"/>
+                                  </PostfixExpression>
+                                </ForSignature>
+                                <Token type=")"/>
+                                <BlockStatement>
+                                  <Token type="{"/>
+                                  <VariableDeclaration>
+                                    <Token type="var"/>
+                                    <VariableDeclarator>
+                                      <Identifier>
+                                        <Token type="«identifier»">code</Token>
+                                      </Identifier>
+                                      <Token type="="/>
+                                      <CallExpression>
+                                        <MemberExpression>
+                                          <Identifier>
+                                            <Token type="«identifier»">source</Token>
+                                          </Identifier>
+                                          <Token type="."/>
+                                          <Identifier>
+                                            <Token type="«identifier»">charCodeAt</Token>
+                                          </Identifier>
+                                        </MemberExpression>
+                                        <ArgumentList>
+                                          <Token type="("/>
+                                          <Identifier>
+                                            <Token type="«identifier»">index</Token>
+                                          </Identifier>
+                                          <Token type=")"/>
+                                        </ArgumentList>
+                                      </CallExpression>
+                                    </VariableDeclarator>
+                                    <Token type=";"/>
+                                  </VariableDeclaration>
+                                  <IfStatement>
+                                    <Token type="if"/>
+                                    <Token type="("/>
+                                    <CallExpression>
+                                      <MemberExpression>
+                                        <Identifier>
+                                          <Token type="«identifier»">Unicode</Token>
+                                        </Identifier>
+                                        <Token type="."/>
+                                        <Identifier>
+                                          <Token type="«identifier»">isLineTerminator</Token>
+                                        </Identifier>
+                                      </MemberExpression>
+                                      <ArgumentList>
+                                        <Token type="("/>
+                                        <Identifier>
+                                          <Token type="«identifier»">code</Token>
+                                        </Identifier>
+                                        <Token type=")"/>
+                                      </ArgumentList>
+                                    </CallExpression>
+                                    <Token type=")"/>
+                                    <BlockStatement>
+                                      <Token type="{"/>
+                                      <IfStatement>
+                                        <Token type="if"/>
+                                        <Token type="("/>
+                                        <BinaryExpression>
+                                          <Identifier>
+                                            <Token type="«identifier»">code</Token>
+                                          </Identifier>
+                                          <Token type="==="/>
+                                          <NumberExpression>
+                                            <Token type="«number»">13</Token>
+                                          </NumberExpression>
+                                        </BinaryExpression>
+                                        <Token type=")"/>
+                                        <BlockStatement>
+                                          <Token type="{"/>
+                                          <IfStatement>
+                                            <Token type="if"/>
+                                            <Token type="("/>
+                                            <BinaryExpression>
+                                              <CallExpression>
+                                                <MemberExpression>
+                                                  <Identifier>
+                                                    <Token type="«identifier»">source</Token>
+                                                  </Identifier>
+                                                  <Token type="."/>
+                                                  <Identifier>
+                                                    <Token type="«identifier»">charCodeAt</Token>
+                                                  </Identifier>
+                                                </MemberExpression>
+                                                <ArgumentList>
+                                                  <Token type="("/>
+                                                  <BinaryExpression>
+                                                    <Identifier>
+                                                      <Token type="«identifier»">index</Token>
+                                                    </Identifier>
+                                                    <Token type="+"/>
+                                                    <NumberExpression>
+                                                      <Token type="«number»">1</Token>
+                                                    </NumberExpression>
+                                                  </BinaryExpression>
+                                                  <Token type=")"/>
+                                                </ArgumentList>
+                                              </CallExpression>
+                                              <Token type="==="/>
+                                              <NumberExpression>
+                                                <Token type="«number»">10</Token>
+                                              </NumberExpression>
+                                            </BinaryExpression>
+                                            <Token type=")"/>
+                                            <BlockStatement>
+                                              <Token type="{"/>
+                                              <ExpressionStatement>
+                                                <PostfixExpression>
+                                                  <Identifier>
+                                                    <Token type="«identifier»">index</Token>
+                                                  </Identifier>
+                                                  <Token type="++"/>
+                                                </PostfixExpression>
+                                                <Token type=";"/>
+                                              </ExpressionStatement>
+                                              <Token type="}"/>
+                                            </BlockStatement>
+                                          </IfStatement>
+                                          <Token type="}"/>
+                                        </BlockStatement>
+                                      </IfStatement>
+                                      <ExpressionStatement>
+                                        <BinaryExpression>
+                                          <MemberExpression>
+                                            <Identifier>
+                                              <Token type="«identifier»">offsets</Token>
+                                            </Identifier>
+                                            <Token type="["/>
+                                            <PostfixExpression>
+                                              <Identifier>
+                                                <Token type="«identifier»">k</Token>
+                                              </Identifier>
+                                              <Token type="++"/>
+                                            </PostfixExpression>
+                                            <Token type="]"/>
+                                          </MemberExpression>
+                                          <Token type="="/>
+                                          <Identifier>
+                                            <Token type="«identifier»">index</Token>
+                                          </Identifier>
+                                        </BinaryExpression>
+                                        <Token type=";"/>
+                                      </ExpressionStatement>
+                                      <Token type="}"/>
+                                    </BlockStatement>
+                                  </IfStatement>
+                                  <Token type="}"/>
+                                </BlockStatement>
+                              </ForStatement>
+                              <ExpressionStatement>
+                                <BinaryExpression>
+                                  <MemberExpression>
+                                    <Identifier>
+                                      <Token type="«identifier»">offsets</Token>
+                                    </Identifier>
+                                    <Token type="["/>
+                                    <PostfixExpression>
+                                      <Identifier>
+                                        <Token type="«identifier»">k</Token>
+                                      </Identifier>
+                                      <Token type="++"/>
+                                    </PostfixExpression>
+                                    <Token type="]"/>
+                                  </MemberExpression>
+                                  <Token type="="/>
+                                  <MemberExpression>
+                                    <Identifier>
+                                      <Token type="«identifier»">source</Token>
+                                    </Identifier>
+                                    <Token type="."/>
+                                    <Identifier>
+                                      <Token type="«identifier»">length</Token>
+                                    </Identifier>
+                                  </MemberExpression>
+                                </BinaryExpression>
+                                <Token type=";"/>
+                              </ExpressionStatement>
+                              <ReturnStatement>
+                                <Token type="return"/>
+                                <Identifier>
+                                  <Token type="«identifier»">offsets</Token>
+                                </Identifier>
+                                <Token type=";"/>
+                              </ReturnStatement>
+                              <Token type="}"/>
+                            </BlockStatement>
+                          </ArrowFunctionExpression>
+                          <Token type=")"/>
+                        </ParenExpression>
+                        <ArgumentList>
+                          <Token type="("/>
+                          <MemberExpression>
+                            <ThisExpression>
+                              <Token type="this"/>
+                            </ThisExpression>
+                            <Token type="."/>
+                            <Identifier>
+                              <Token type="«identifier»">content</Token>
+                            </Identifier>
+                          </MemberExpression>
+                          <Token type=")"/>
+                        </ArgumentList>
+                      </CallExpression>
+                    </ObjectProperty>
+                    <Token type="}"/>
+                  </ObjectExpression>
+                  <Token type=")"/>
+                </ArgumentList>
+              </CallExpression>
+              <Token type=";"/>
+            </ExpressionStatement>
+            <ReturnStatement>
+              <Token type="return"/>
+              <MemberExpression>
+                <ThisExpression>
+                  <Token type="this"/>
+                </ThisExpression>
+                <Token type="."/>
+                <Identifier>
+                  <Token type="«identifier»">table</Token>
+                </Identifier>
+              </MemberExpression>
+              <Token type=";"/>
+            </ReturnStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassGetter>
+        <ClassMethod>
+          <Identifier>
+            <Token type="«identifier»">getPosition</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <FormalParameter>
+              <Identifier>
+                <Token type="«identifier»">offset</Token>
+              </Identifier>
+            </FormalParameter>
+            <Token type=")"/>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <IfStatement>
+              <Token type="if"/>
+              <Token type="("/>
+              <BinaryExpression>
+                <Identifier>
+                  <Token type="«identifier»">offset</Token>
+                </Identifier>
+                <Token type="<="/>
+                <NumberExpression>
+                  <Token type="«number»">0</Token>
+                </NumberExpression>
+              </BinaryExpression>
+              <Token type=")"/>
+              <BlockStatement>
+                <Token type="{"/>
+                <ReturnStatement>
+                  <Token type="return"/>
+                  <ObjectExpression>
+                    <Token type="{"/>
+                    <ObjectProperty>
+                      <Token type="«identifier»">line</Token>
+                      <Token type=":"/>
+                      <NumberExpression>
+                        <Token type="«number»">1</Token>
+                      </NumberExpression>
+                    </ObjectProperty>
+                    <Token type=","/>
+                    <ObjectProperty>
+                      <Token type="«identifier»">column</Token>
+                      <Token type=":"/>
+                      <NumberExpression>
+                        <Token type="«number»">0</Token>
+                      </NumberExpression>
+                    </ObjectProperty>
+                    <Token type="}"/>
+                  </ObjectExpression>
+                </ReturnStatement>
+                <Token type="}"/>
+              </BlockStatement>
+              <Token type="else"/>
+              <BlockStatement>
+                <Token type="{"/>
+                <VariableDeclaration>
+                  <Token type="var"/>
+                  <VariableDeclarator>
+                    <Identifier>
+                      <Token type="«identifier»">line</Token>
+                    </Identifier>
+                  </VariableDeclarator>
+                  <Token type=","/>
+                  <VariableDeclarator>
+                    <Identifier>
+                      <Token type="«identifier»">column</Token>
+                    </Identifier>
+                  </VariableDeclarator>
+                  <Token type=";"/>
+                </VariableDeclaration>
+                <ForStatement>
+                  <Token type="for"/>
+                  <Token type="("/>
+                  <ForSignature>
+                    <BinaryExpression>
+                      <Identifier>
+                        <Token type="«identifier»">line</Token>
+                      </Identifier>
+                      <Token type="="/>
+                      <NumberExpression>
+                        <Token type="«number»">0</Token>
+                      </NumberExpression>
+                    </BinaryExpression>
+                    <Token type=";"/>
+                    <BinaryExpression>
+                      <Identifier>
+                        <Token type="«identifier»">line</Token>
+                      </Identifier>
+                      <Token type="<"/>
+                      <MemberExpression>
+                        <MemberExpression>
+                          <ThisExpression>
+                            <Token type="this"/>
+                          </ThisExpression>
+                          <Token type="."/>
+                          <Identifier>
+                            <Token type="«identifier»">table</Token>
+                          </Identifier>
+                        </MemberExpression>
+                        <Token type="."/>
+                        <Identifier>
+                          <Token type="«identifier»">length</Token>
+                        </Identifier>
+                      </MemberExpression>
+                    </BinaryExpression>
+                    <Token type=";"/>
+                    <PostfixExpression>
+                      <Identifier>
+                        <Token type="«identifier»">line</Token>
+                      </Identifier>
+                      <Token type="++"/>
+                    </PostfixExpression>
+                  </ForSignature>
+                  <Token type=")"/>
+                  <BlockStatement>
+                    <Token type="{"/>
+                    <IfStatement>
+                      <Token type="if"/>
+                      <Token type="("/>
+                      <BinaryExpression>
+                        <Identifier>
+                          <Token type="«identifier»">offset</Token>
+                        </Identifier>
+                        <Token type="<="/>
+                        <MemberExpression>
+                          <MemberExpression>
+                            <ThisExpression>
+                              <Token type="this"/>
+                            </ThisExpression>
+                            <Token type="."/>
+                            <Identifier>
+                              <Token type="«identifier»">table</Token>
+                            </Identifier>
+                          </MemberExpression>
+                          <Token type="["/>
+                          <Identifier>
+                            <Token type="«identifier»">line</Token>
+                          </Identifier>
+                          <Token type="]"/>
+                        </MemberExpression>
+                      </BinaryExpression>
+                      <Token type=")"/>
+                      <BlockStatement>
+                        <Token type="{"/>
+                        <BreakStatement>
+                          <Token type="break"/>
+                          <Token type=";"/>
+                        </BreakStatement>
+                        <Token type="}"/>
+                      </BlockStatement>
+                    </IfStatement>
+                    <Token type="}"/>
+                  </BlockStatement>
+                </ForStatement>
+                <ExpressionStatement>
+                  <BinaryExpression>
+                    <Identifier>
+                      <Token type="«identifier»">column</Token>
+                    </Identifier>
+                    <Token type="="/>
+                    <BinaryExpression>
+                      <Identifier>
+                        <Token type="«identifier»">offset</Token>
+                      </Identifier>
+                      <Token type="-"/>
+                      <MemberExpression>
+                        <MemberExpression>
+                          <ThisExpression>
+                            <Token type="this"/>
+                          </ThisExpression>
+                          <Token type="."/>
+                          <Identifier>
+                            <Token type="«identifier»">table</Token>
+                          </Identifier>
+                        </MemberExpression>
+                        <Token type="["/>
+                        <BinaryExpression>
+                          <Identifier>
+                            <Token type="«identifier»">line</Token>
+                          </Identifier>
+                          <Token type="-"/>
+                          <NumberExpression>
+                            <Token type="«number»">1</Token>
+                          </NumberExpression>
+                        </BinaryExpression>
+                        <Token type="]"/>
+                      </MemberExpression>
+                    </BinaryExpression>
+                  </BinaryExpression>
+                  <Token type=";"/>
+                </ExpressionStatement>
+                <ReturnStatement>
+                  <Token type="return"/>
+                  <ObjectExpression>
+                    <Token type="{"/>
+                    <ObjectProperty>
+                      <Token type="«identifier»">line</Token>
+                      <Token type=":"/>
+                      <Identifier>
+                        <Token type="«identifier»">line</Token>
+                      </Identifier>
+                    </ObjectProperty>
+                    <Token type=","/>
+                    <ObjectProperty>
+                      <Token type="«identifier»">column</Token>
+                      <Token type=":"/>
+                      <Identifier>
+                        <Token type="«identifier»">column</Token>
+                      </Identifier>
+                    </ObjectProperty>
+                    <Token type="}"/>
+                  </ObjectExpression>
+                  <Token type=";"/>
+                </ReturnStatement>
+                <Token type="}"/>
+              </BlockStatement>
+            </IfStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassMethod>
+        <ClassMethod>
+          <Identifier>
+            <Token type="«identifier»">getLocation</Token>
+          </Identifier>
+          <FormalSignature>
+            <Token type="("/>
+            <FormalParameter>
+              <Identifier>
+                <Token type="«identifier»">startOffset</Token>
+              </Identifier>
+            </FormalParameter>
+            <Token type=","/>
+            <FormalParameter>
+              <Identifier>
+                <Token type="«identifier»">endOffset</Token>
+              </Identifier>
+            </FormalParameter>
+            <Token type=")"/>
+          </FormalSignature>
+          <BlockStatement>
+            <Token type="{"/>
+            <ReturnStatement>
+              <Token type="return"/>
+              <ObjectExpression>
+                <Token type="{"/>
+                <ObjectProperty>
+                  <Token type="«identifier»">start</Token>
+                  <Token type=":"/>
+                  <CallExpression>
+                    <MemberExpression>
+                      <ThisExpression>
+                        <Token type="this"/>
+                      </ThisExpression>
+                      <Token type="."/>
+                      <Identifier>
+                        <Token type="«identifier»">getPosition</Token>
+                      </Identifier>
+                    </MemberExpression>
+                    <ArgumentList>
+                      <Token type="("/>
+                      <Identifier>
+                        <Token type="«identifier»">startOffset</Token>
+                      </Identifier>
+                      <Token type=")"/>
+                    </ArgumentList>
+                  </CallExpression>
+                </ObjectProperty>
+                <Token type=","/>
+                <ObjectProperty>
+                  <Token type="«identifier»">end</Token>
+                  <Token type=":"/>
+                  <CallExpression>
+                    <MemberExpression>
+                      <ThisExpression>
+                        <Token type="this"/>
+                      </ThisExpression>
+                      <Token type="."/>
+                      <Identifier>
+                        <Token type="«identifier»">getPosition</Token>
+                      </Identifier>
+                    </MemberExpression>
+                    <ArgumentList>
+                      <Token type="("/>
+                      <Identifier>
+                        <Token type="«identifier»">endOffset</Token>
+                      </Identifier>
+                      <Token type=")"/>
+                    </ArgumentList>
+                  </CallExpression>
+                </ObjectProperty>
+                <Token type="}"/>
+              </ObjectExpression>
+            </ReturnStatement>
+            <Token type="}"/>
+          </BlockStatement>
+        </ClassMethod>
+        <Token type="}"/>
+      </ClassBody>
+    </ClassDeclaration>
+  </ExportDeclaration>
 </Module>

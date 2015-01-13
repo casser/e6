@@ -15,6 +15,7 @@
 import {Entity} from '../util/Entity';
 import {ValueParser} from '../util/ValueParser';
 
+
 class TokenType {
   //keywords
   get AS                         (){ return 'as';                 }

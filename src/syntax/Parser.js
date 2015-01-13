@@ -43,6 +43,14 @@ class Parser extends Entity {
         }
         return false;
     }
+    isSemi(){
+        switch (this.token.type) {
+            case Token.Type.SEMI_COLON  :
+            case Token.Type.END_OF_FILE :
+            case Token.Type.CLOSE_CURLY : return true;
+            default                     : return this.token.ltb;
+        }
+    }
     eat(type:Function):Marker{
         if(this.is(type)){
             return this.builder.eat(type);
@@ -56,15 +64,6 @@ class Parser extends Entity {
             }
         }
         this.error(`Expected tokens are [${type.map((a)=>a.type).join(',')}] but got token ${this.token.type}`)
-    }
-    eatAll(...types:Function):Marker{
-        for(var type of types){
-            if(this.is(type)){
-                return this.eat(type);
-            }else{
-                this.error(`Expected tokens are [${type.map((a)=>a.type).join(',')}] but got token ${this.token.type}`)
-            }
-        }
     }
     eatIf(type:Function){
         if(this.is(type)){
@@ -91,14 +90,6 @@ class Parser extends Entity {
         }
         if (!this.token.ltb){
             this.error(`Semi-colon expected got '${this.token.type}' ${this.token.ltb}`);
-        }
-    }
-    isSemi(){
-        switch (this.token.type) {
-            case Token.Type.SEMI_COLON  :
-            case Token.Type.END_OF_FILE :
-            case Token.Type.CLOSE_CURLY : return true;
-            default                     : return this.token.ltb;
         }
     }
     mark(node:Function):Marker{
@@ -161,10 +152,9 @@ class Parser extends Entity {
             }
         }else
         if(this.is(Token.Type.OPEN_CURLY)) {
-            if(this.if(Token.Type.OPEN_CURLY)) {
+            if(!this.is(Token.Type.CLOSE_CURLY)) {
                 this.parseImportSpecifiers();
             }
-            this.eat(Token.Type.FROM);
         }
         this.eat(Token.Type.FROM);
         this.parseModuleSpecifier();
@@ -393,17 +383,130 @@ class Parser extends Entity {
         this.eat(Token.Type.SEMI_COLON);
         return marker.done(Ast.EmptyStatement);
     }
+    parseTryStatement(){
+        var marker = this.mark(Ast.TryStatement)
+        this.eat(Token.Type.TRY);
+        this.parseBlockStatement();
+        if (this.is(Token.Type.CATCH)) {
+            var catchMarker =  this.mark(Ast.Catch)
+            this.eat(Token.Type.CATCH);
+            this.eat(Token.Type.OPEN_PAREN);
+            this.eat(Token.Type.IDENTIFIER);
+            this.eat(Token.Type.CLOSE_PAREN);
+            this.parseBlockStatement();
+            catchMarker.done(Ast.Catch);
+        }
+        if (this.is(Token.Type.FINALLY)) {
+            var finallyMarker =  this.mark(Ast.Finally)
+            this.eat(Token.Type.FINALLY);
+            this.parseBlockStatement();
+            finallyMarker.done(Ast.Finally);
+        }
+        return marker.done(Ast.TryStatement);
+    }
+    parseSwitchStatement(){
+        var marker = this.mark(Ast.SwitchStatement);
+        this.eat(Token.Type.SWITCH);
+        this.eat(Token.Type.OPEN_PAREN);
+        this.parseExpression();
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.Type.OPEN_CURLY);
+        while(true){
+            if(this.is(Token.Type.CASE)){
+                var caseMarker = this.mark(Ast.CaseClause);
+                this.eat(Token.Type.CASE);
+                this.parseExpression();
+                this.eat(Token.Type.COLON);
+                this.parseSwitchStatements();
+                caseMarker.done(Ast.CaseClause);
+            } else
+            if(this.is(Token.Type.DEFAULT)){
+                var defaultMarker = this.mark(Ast.DefaultClause);
+                this.eat(Token.Type.DEFAULT);
+                this.eat(Token.Type.COLON);
+                this.parseSwitchStatements();
+                defaultMarker.done(Ast.DefaultClause);
+            }else{
+                break;
+            }
+        }
+        this.eat(Token.Type.CLOSE_CURLY);
+        return marker.done(Ast.SwitchStatement);
+    }
+    parseSwitchStatements(){
+        while (!this.isIn(
+            Token.Type.CASE,
+            Token.Type.DEFAULT,
+            Token.Type.CLOSE_CURLY,
+            Token.Type.END_OF_FILE
+        )) {
+            this.parseStatement()
+        }
+    }
+    parseForStatement() {
+        var marker = this.mark(Ast.ForStatement);
+        this.eat(Token.Type.FOR);
+        this.eat(Token.Type.OPEN_PAREN);
+
+        this.parseForInHeader() ||
+        this.parseForHeader()   ;
+
+        this.eat(Token.Type.CLOSE_PAREN);
+        this.parseStatement();
+        return marker.done(Ast.ForStatement);
+    }
+    parseForInHeader(){
+        var marker = this.mark(Ast.ForSignature);
+        if(this.isIn(Token.Type.VAR,Token.Type.LET)){
+            this.parseVariableDeclaration();
+        }else
+        if(!this.is(Token.Type.SEMI_COLON)){
+            this.parseExpression();
+        }
+        if(this.eatIfAny(Token.Type.IN,Token.Type.OF)){
+            this.parseExpression();
+            return marker.done(Ast.ForSignature)
+        }else{
+            return marker.rollback();
+        }
+    }
+    parseForHeader(){
+        var marker = this.mark(Ast.ForSignature);
+        if(this.isIn(Token.Type.VAR,Token.Type.LET)){
+            this.parseVariableDeclaration();
+            this.eat(Token.Type.SEMI_COLON)
+        }else
+        if(!this.is(Token.Type.SEMI_COLON)){
+            this.parseExpression();
+            this.eat(Token.Type.SEMI_COLON)
+        }else{
+            this.eat(Token.Type.SEMI_COLON)
+        }
+        if(!this.is(Token.Type.SEMI_COLON)){
+            this.parseExpression();
+            this.eat(Token.Type.SEMI_COLON)
+        }else{
+            this.eat(Token.Type.SEMI_COLON)
+        }
+        if(!this.is(Token.Type.CLOSE_PAREN)){
+            this.parseExpression();
+        }
+        return marker.done(Ast.ForSignature)
+    }
     //</editor-fold>
     //<editor-fold desc="Declarations">
     //<editor-fold desc="Variable Declaration">
     parseVariableDeclaration(){
+        var inFor = this.builder.in(Ast.ForSignature);
         var marker = this.mark(Ast.VariableDeclaration);
         this.eatAny(Token.Type.VAR,Token.Type.CONST,Token.Type.LET);
         this.parseVariableDeclarator();
         while(this.eatIf(Token.Type.COMMA)) {
             this.parseVariableDeclarator();
         }
-        this.eatSemi();
+        if(!inFor){
+            this.eatSemi();
+        }
         return marker.done(Ast.VariableDeclaration);
     }
     parseVariableDeclarator() {
@@ -778,6 +881,7 @@ class Parser extends Entity {
             case Token.Type.NAN             : expression = this.parseNanExpression();           break;
             case Token.Type.UNDEFINED       : expression = this.parseUndefinedExpression();     break;
             case Token.Type.THIS            : expression = this.parseThisExpression();          break;
+            case Token.Type.SUPER           : expression = this.parseSuperExpression();          break;
             case Token.Type.IDENTIFIER      : expression = this.parseIdentifier();              break;
             case Token.Type.CLASS           : expression = this.parseClassExpression();         break;
             case Token.Type.FUNCTION        : expression = this.parseFunctionExpression();      break;
@@ -823,6 +927,11 @@ class Parser extends Entity {
         var marker= this.mark(Ast.ThisExpression);
         this.eat(Token.Type.THIS);
         return marker.done(Ast.ThisExpression);
+    }
+    parseSuperExpression(){
+        var marker= this.mark(Ast.SuperExpression);
+        this.eat(Token.Type.SUPER);
+        return marker.done(Ast.SuperExpression);
     }
     parseParenExpression(){
         var marker = this.mark(Ast.ParenExpression);

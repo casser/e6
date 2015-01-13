@@ -50,7 +50,7 @@ export class Ast {
     static get ExportStar                   (){return ExportStar                   ;}
     static get ExpressionStatement          (){return ExpressionStatement          ;}
     static get Finally                      (){return Finally                      ;}
-    static get ForInStatement               (){return ForInStatement               ;}
+    static get ForSignature                 (){return ForSignature                 ;}
     static get ForOfStatement               (){return ForOfStatement               ;}
     static get ForStatement                 (){return ForStatement                 ;}
     static get FormalParameter              (){return FormalParameter              ;}
@@ -184,7 +184,7 @@ class ExportSpecifierSet             extends AstNode {}
 class ExportStar                     extends AstNode {}
 class ExpressionStatement            extends AstNode {}
 class Finally                        extends AstNode {}
-class ForInStatement                 extends AstNode {}
+class ForSignature                   extends AstNode {}
 class ForOfStatement                 extends AstNode {}
 class ForStatement                   extends AstNode {}
 class FormalParameter                extends AstNode {}

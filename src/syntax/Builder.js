@@ -126,7 +126,9 @@ export class Builder extends Entity {
     get tree(){
         return this.build(this.stack[0]);
     }
-
+    get parent(){
+        return this.stack.peek
+    }
     constructor({source,options,parser}) {
         
         super({
@@ -144,7 +146,9 @@ export class Builder extends Entity {
             }
         })
     }
-
+    in(node){
+        return this.parent.node==node;
+    }
     eat(type:Function){
         if(this.token.type==type){
             var marker = this.stack[this.stack.push(

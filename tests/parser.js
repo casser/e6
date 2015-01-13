@@ -31,7 +31,6 @@ class Main {
             console.info(tree);
             Main.FS.writeFileSync(Main.SOURCE_TREE_XML,tree);
         }
-
         //Main.print(tree);
         //Main.write(tree);
     }
