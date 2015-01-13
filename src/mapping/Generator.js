@@ -51,7 +51,6 @@ export class SourceMapGenerator {
         });
         return generator;
     }
-
     /**
      * An instance of the SourceMapGenerator represents a source map which is
      * being built incrementally. You may pass an object with the following

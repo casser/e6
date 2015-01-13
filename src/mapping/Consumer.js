@@ -11,7 +11,6 @@ export class SourceMapConsumer {
     static get ORIGINAL_ORDER() {
         return 2
     }
-
     /**
      * A SourceMapConsumer instance represents a parsed source map which we can
      * query for information about the original file positions by giving it a file
