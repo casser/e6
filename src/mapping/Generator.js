@@ -1,9 +1,7 @@
 import {
-    VLQ
-} from './VLQ';
-import {
     Utils,
     ArraySet,
+    VLQ,
     MappingList
 } from './Utils';
 
