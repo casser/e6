@@ -1,12 +1,15 @@
 import {Entity} from '../util/Entity.js';
-export class AstNode extends Entity {
+export class Node extends Entity {
     static get TYPE(){
         return this;
     }
     get type(){
         return this.constructor;
     }
-    get parent():AstNode{
+    get name(){
+        return this.type.name.substring(0,this.type.name.length-4)
+    }
+    get parent():Node{
         return this.$.parent;
     }
     get children():Array{
@@ -15,10 +18,10 @@ export class AstNode extends Entity {
         }
         return this.$.children;
     }
-    get first():AstNode{
+    get first():Node{
         return this.children[0];
     }
-    get last():AstNode{
+    get last():Node{
         return this.children[this.children.length-1];
     }
     get range(){
@@ -55,7 +58,7 @@ export class AstNode extends Entity {
         var sLoc = `${this.location.start.line}:${this.location.start.column}`;
         var eLoc = `${this.location.end.line}:${this.location.end.column}`;
         var loc  = pl?` pos="${this.range.join('-')}" loc="${sLoc}-${eLoc}"`:'';
-        lst.push(`${tab}<${this.type.name}${loc}>`);
+        lst.push(`${tab}<${this.name}${loc}>`);
         for(var child of this.$.children){
             if(child){
                 lst.push(child.toXML(l+1,pl));
@@ -63,7 +66,7 @@ export class AstNode extends Entity {
                 lst.push('<ERROR>');
             }
         }
-        lst.push(`${tab}</${this.type.name}>`);
+        lst.push(`${tab}</${this.name}>`);
         return lst.join('\n')
     }
 }

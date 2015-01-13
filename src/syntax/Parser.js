@@ -1007,7 +1007,7 @@ class Parser extends Entity {
         return marker;
     }
     parseArguments() {
-        var marker = this.mark(Ast.ArgumentList);
+        var marker = this.mark(Ast.Arguments);
         this.eat(Token.Type.OPEN_PAREN);
         if (!this.is(Token.Type.CLOSE_PAREN)) {
             this.parseArgument();
@@ -1016,7 +1016,7 @@ class Parser extends Entity {
             }
         }
         this.eat(Token.Type.CLOSE_PAREN);
-        return marker.done(Ast.ArgumentList);
+        return marker.done(Ast.Arguments);
     }
     parseArgument() {
         if (this.is(Token.Type.DOT_DOT_DOT)){
@@ -1025,7 +1025,7 @@ class Parser extends Entity {
         return this.parseAssignmentExpression();
     }
     parseArrayExpression(){
-        var marker = this.mark(Ast.ArrayExpression);
+        var marker = this.mark(Ast.ArrayLiteral);
         this.eat(Token.Type.OPEN_SQUARE);
         while(!this.is(Token.Type.CLOSE_SQUARE)){
             this.parseArrayElement();
@@ -1034,7 +1034,7 @@ class Parser extends Entity {
             }
         }
         this.eat(Token.Type.CLOSE_SQUARE);
-        return marker.done(Ast.ArrayExpression);
+        return marker.done(Ast.ArrayLiteral);
     }
     parseArrayElement(){
         var marker = this.mark(Ast.ArrayElement);
@@ -1066,11 +1066,16 @@ class Parser extends Entity {
         return marker;
     }
     parseArrowExpression(){
-        var marker = this.mark(Ast.ArrowFunctionExpression);
+        var marker = this.mark(Ast.ArrowExpression);
         this.parseFormalSignature();
         this.eat(Token.Type.ARROW);
-        this.parseBlockStatement();
-        return marker.done(Ast.ArrowFunctionExpression);
+        if(this.is(Token.Type.OPEN_CURLY)){
+            this.parseBlockStatement();
+        }else{
+            this.parseExpressionStatement();
+        }
+
+        return marker.done(Ast.ArrowExpression);
     }
     parseFunctionExpression(){
         var marker = this.mark(Ast.FunctionExpression);
@@ -1083,7 +1088,7 @@ class Parser extends Entity {
         return marker.done(Ast.FunctionExpression);
     }
     parseTemplateExpression() {
-        var marker = this.mark(Ast.TemplateLiteralExpression);
+        var marker = this.mark(Ast.TemplateExpression);
         if(this.is(Token.Type.TEMPLATE)){
             this.eat(Token.Type.TEMPLATE);
         }else
@@ -1099,7 +1104,7 @@ class Parser extends Entity {
                 }
             }while(!this.eatIf(Token.Type.TEMPLATE_TAIL));
         }
-        return marker.done(Ast.TemplateLiteralExpression);
+        return marker.done(Ast.TemplateExpression);
     }
     parseRegexpExpression() {
         var marker = this.mark(Ast.RegexpExpression);

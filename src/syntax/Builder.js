@@ -100,7 +100,6 @@ export class Builder extends Entity {
     get scanner(){
         return this.$.scanner;
     }
-
     get stack(){
         return this.$.stack
     }
@@ -130,7 +129,6 @@ export class Builder extends Entity {
         return this.stack.peek
     }
     constructor({source,options,parser}) {
-        
         super({
             source,options,parser,
             stack       : [],

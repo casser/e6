@@ -1,6 +1,5 @@
 var Module = require('module');
 Module._resolveFileName = Module._resolveFilename;
-
 Module._resolveFilename = function(request, parent) {
     return Module._resolveFileName(request, parent);
 };
