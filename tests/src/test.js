@@ -1,1 +1,3 @@
-var hello:String = (a)=>`grish ${a} jan`;
+var hello:String = (a)=>`grish
+${a}
+jan`;

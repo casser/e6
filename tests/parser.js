@@ -2,6 +2,7 @@ import {Scanner}       from '../src/syntax/Scanner';
 import {Parser}        from '../src/syntax/Parser';
 import {Options}       from '../src/Options';
 import {Source}        from '../src/syntax/Source';
+import {Visitor}        from '../src/syntax/Visitor';
 
 
 class Main {
@@ -27,8 +28,9 @@ class Main {
         });
         var tree = parser.parse();
         if(tree){
+            var visitor = new Visitor();
+            visitor.visit(tree);
             tree = tree.toXML();
-            console.info(tree);
             Main.FS.writeFileSync(Main.SOURCE_TREE_XML,tree);
         }
         //Main.print(tree);

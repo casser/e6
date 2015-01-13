@@ -190,7 +190,6 @@ export class Scanner extends Entity {
         return this.nextTemplateLiteralTokenShared(Token.Type.TEMPLATE_TAIL, Token.Type.TEMPLATE_MIDDLE);
     }
     nextTemplateLiteralTokenShared(endType, middleType) {
-        console.info("TPL",endType, middleType)
         var beginIndex = this.$.index;
 
         this.skipTemplateCharacter();
@@ -620,8 +619,9 @@ export class Scanner extends Entity {
             } else if (code === 92) {  // \
                 this.next();
                 code = this.readUnicodeEscapeSequence();
-                if (!escapedCharCodes)
+                if (!escapedCharCodes) {
                     escapedCharCodes = [];
+                }
                 escapedCharCodes.push(code);
                 if (!Unicode.isIdPartChar(code))
                     return this.createToken(Token.Type.ERROR, beginIndex);
@@ -632,7 +632,7 @@ export class Scanner extends Entity {
 
         var value = this.input.slice(beginIndex, this.$.index);
         if (Token.isKeyword(value)) {
-            return this.createToken(value,beginIndex,value);
+            return this.createToken(Token.isKeyword(value),beginIndex,value);
         }
         if (escapedCharCodes) {
             var i = 0;

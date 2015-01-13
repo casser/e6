@@ -1,37 +1,37 @@
 <Module>
   <VariableDeclaration>
-    <Token type="var"/>
+    <VAR text="var"/>
     <VariableDeclarator>
       <Identifier>
-        <Token type="«identifier»">hello</Token>
+        <IDENTIFIER text="hello"/>
       </Identifier>
-      <Token type=":"/>
+      <COLON text=":"/>
       <TypeReference>
         <Identifier>
-          <Token type="«identifier»">String</Token>
+          <IDENTIFIER text="String"/>
         </Identifier>
       </TypeReference>
-      <Token type="="/>
+      <EQUAL text="="/>
       <ArrowExpression>
         <FormalSignature>
-          <Token type="("/>
+          <OPEN_PAREN text="("/>
           <FormalParameter>
             <Identifier>
-              <Token type="«identifier»">a</Token>
+              <IDENTIFIER text="a"/>
             </Identifier>
           </FormalParameter>
-          <Token type=")"/>
+          <CLOSE_PAREN text=")"/>
         </FormalSignature>
-        <Token type="=>"/>
+        <ARROW text="=>"/>
         <ExpressionStatement>
           <TemplateExpression>
-            <Token type="«template-head»">`grish ${</Token>
+            <TEMPLATE_HEAD text="`grish\n${"/>
             <Identifier>
-              <Token type="«identifier»">a</Token>
+              <IDENTIFIER text="a"/>
             </Identifier>
-            <Token type="«template-tail»">} jan`</Token>
+            <TEMPLATE_TAIL text="}\njan`"/>
           </TemplateExpression>
-          <Token type=";"/>
+          <SEMI_COLON text=";"/>
         </ExpressionStatement>
       </ArrowExpression>
     </VariableDeclarator>
