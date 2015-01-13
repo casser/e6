@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Entity} from '../util/Entity';
-import {Unicode} from './unicode';
+import {Unicode} from './Unicode';
 
 /**
  * A source file.

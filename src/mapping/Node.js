@@ -1,9 +1,9 @@
 import {
     SourceMapGenerator
-} from './generator';
+} from './Generator';
 import {
     Utils
-} from './utils';
+} from './Utils';
 
 export class SourceNode {
     static get REGEX_NEWLINE(){

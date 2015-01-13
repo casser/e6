@@ -1,10 +1,10 @@
 import {
     Utils,
     ArraySet
-} from './utils';
+} from './Utils';
 import {
     VLQ
-} from './vlq';
+} from './VLQ';
 
 export class SourceMapConsumer {
     static get GENERATED_ORDER() {

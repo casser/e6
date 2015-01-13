@@ -1,6 +1,6 @@
-import {SourceMapConsumer}  from '../src/mapping/consumer';
-import {SourceMapGenerator} from '../src/mapping/generator';
-import {SourceNode}         from '../src/mapping/node';
+import {SourceMapConsumer}  from '../src/mapping/Consumer';
+import {SourceMapGenerator} from '../src/mapping/Generator';
+import {SourceNode}         from '../src/mapping/Node';
 import FS from 'fs';
 
 var smc = new SourceMapConsumer({

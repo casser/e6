@@ -5,7 +5,7 @@ import {
     Utils,
     ArraySet,
     MappingList
-} from './utils';
+} from './Utils';
 
 export class SourceMapGenerator {
     /**
