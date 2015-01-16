@@ -1,39 +1,22 @@
-<Module>
-  <VariableDeclaration>
-    <VAR text="var"/>
-    <VariableDeclarator>
-      <Identifier>
-        <IDENTIFIER text="hello"/>
-      </Identifier>
-      <COLON text=":"/>
-      <TypeReference>
-        <Identifier>
-          <IDENTIFIER text="String"/>
-        </Identifier>
-      </TypeReference>
-      <EQUAL text="="/>
-      <ArrowExpression>
-        <FormalSignature>
-          <OPEN_PAREN text="("/>
-          <FormalParameter>
-            <Identifier>
-              <IDENTIFIER text="a"/>
-            </Identifier>
-          </FormalParameter>
-          <CLOSE_PAREN text=")"/>
-        </FormalSignature>
-        <ARROW text="=>"/>
-        <ExpressionStatement>
-          <TemplateExpression>
-            <TEMPLATE_HEAD text="`grish\n${"/>
-            <Identifier>
-              <IDENTIFIER text="a"/>
-            </Identifier>
-            <TEMPLATE_TAIL text="}\njan`"/>
-          </TemplateExpression>
-          <SEMI_COLON text=";"/>
-        </ExpressionStatement>
-      </ArrowExpression>
-    </VariableDeclarator>
-  </VariableDeclaration>
+<Module pos="0-23" loc="1:0-4:5">
+<ExpressionStatement pos="0-5" loc="1:0-1:5">
+  <Identifier pos="0-5" loc="1:0-1:5">
+    <IDENTIFIER lt="ny" pos="0-5" loc="1:0-1:5" text="hello"/>
+  </Identifier>
+</ExpressionStatement>
+<ExpressionStatement pos="6-11" loc="2:0-2:5">
+  <Identifier pos="6-11" loc="2:0-2:5">
+    <IDENTIFIER lt="yy" pos="6-11" loc="2:0-2:5" text="world"/>
+  </Identifier>
+</ExpressionStatement>
+<ExpressionStatement pos="12-17" loc="3:0-3:5">
+  <Identifier pos="12-17" loc="3:0-3:5">
+    <IDENTIFIER lt="yy" pos="12-17" loc="3:0-3:5" text="world"/>
+  </Identifier>
+</ExpressionStatement>
+<ExpressionStatement pos="18-23" loc="4:0-4:5">
+  <Identifier pos="18-23" loc="4:0-4:5">
+    <IDENTIFIER lt="yn" pos="18-23" loc="4:0-4:5" text="world"/>
+  </Identifier>
+</ExpressionStatement>
 </Module>

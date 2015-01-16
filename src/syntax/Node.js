@@ -1,7 +1,27 @@
 import {Entity} from '../util/Entity.js';
+import {Token,TokenType} from '../syntax/Token';
 export class Node extends Entity {
     static get TYPE(){
         return this;
+    }
+    static is(node,...types){
+
+        for(var type of types){
+            if(node instanceof Token){
+                return (node.type == type);
+            } else
+            if(typeof type=='function'){
+                if(node.constructor == type){
+                    return true;
+                }
+            }else
+            if(typeof type=='string'){
+                if(node.name == type){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     get type(){
         return this.constructor;
@@ -36,6 +56,25 @@ export class Node extends Entity {
             end     : this.last?this.last.location.end:NaN
         }
     }
+    find(name) {
+        var result = this.children.filter((child)=> {
+            return Node.is(child,name);
+        });
+        if(!result.length && (name instanceof TokenType)){
+            result.push(name);
+        }
+        return result;
+    }
+    get(name) {
+        for(var child of this.children){
+           if(Node.is(child,name)){
+               return child;
+           }
+        }
+        if(name instanceof TokenType){
+            return name;
+        }
+    }
     add(child){
         return (this.children.push(child),child);
     }
@@ -51,6 +90,9 @@ export class Node extends Entity {
         },this.$);
         delete node.location;
         return node;
+    }
+    is(...types){
+        return Node.is(this,...types);
     }
     toXML(l=1,pl=false){
         var tab = Entity.repeat(l);

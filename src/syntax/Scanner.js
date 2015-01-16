@@ -8,7 +8,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES Token.Type.OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES Token.OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
@@ -61,6 +61,10 @@ export class Scanner extends Entity {
     get lastToken() {
         return this.$.lastToken;
     }
+    mark(){
+        return this.$.marker = this.$.index;
+    }
+
     regexp(value){
         if(value ){
             this.$.regexp = value;
@@ -71,13 +75,13 @@ export class Scanner extends Entity {
     }
     nextCloseAngle() {
         switch (this.$.currentToken.type) {
-            case Token.Type.GREATER_EQUAL:
-            case Token.Type.RIGHT_SHIFT:
-            case Token.Type.RIGHT_SHIFT_EQUAL:
-            case Token.Type.UNSIGNED_RIGHT_SHIFT:
-            case Token.Type.UNSIGNED_RIGHT_SHIFT_EQUAL:
+            case Token.GREATER_EQUAL:
+            case Token.RIGHT_SHIFT:
+            case Token.RIGHT_SHIFT_EQUAL:
+            case Token.UNSIGNED_RIGHT_SHIFT:
+            case Token.UNSIGNED_RIGHT_SHIFT_EQUAL:
                 this.index -= this.$.currentToken.type.length - 1;
-                this.$.lastToken = this.createToken(Token.Type.CLOSE_ANGLE, this.$.index);
+                this.$.lastToken = this.createToken(Token.CLOSE_ANGLE, this.$.index);
                 this.$.currentToken = this.scanToken();
                 return this.$.lastToken;
         }
@@ -178,16 +182,16 @@ export class Scanner extends Entity {
     scanTemplateStart(beginIndex) {
         if (this.isAtEndInternal()) {
             this.reportError('Unterminated template literal');
-            return this.$.lastToken = this.createToken(Token.Type.END_OF_FILE, beginIndex);
+            return this.$.lastToken = this.createToken(Token.END_OF_FILE, beginIndex);
         }
-        return this.nextTemplateLiteralTokenShared(Token.Type.TEMPLATE,Token.Type.TEMPLATE_HEAD);
+        return this.nextTemplateLiteralTokenShared(Token.TEMPLATE,Token.TEMPLATE_HEAD);
     }
     nextTemplateLiteralTokenInternal() {
         if (this.isAtEndInternal()) {
             this.reportError('Expected \'}\' after expression in template literal');
-            return this.createToken(Token.Type.END_OF_FILE, this.$.index);
+            return this.createToken(Token.END_OF_FILE, this.$.index);
         }
-        return this.nextTemplateLiteralTokenShared(Token.Type.TEMPLATE_TAIL, Token.Type.TEMPLATE_MIDDLE);
+        return this.nextTemplateLiteralTokenShared(Token.TEMPLATE_TAIL, Token.TEMPLATE_MIDDLE);
     }
     nextTemplateLiteralTokenShared(endType, middleType) {
         var beginIndex = this.$.index;
@@ -196,7 +200,7 @@ export class Scanner extends Entity {
 
         if (this.isAtEndInternal()) {
             this.reportError('Unterminated template literal');
-            return this.createToken(Token.Type.ERROR, beginIndex);
+            return this.createToken(Token.ERROR, beginIndex);
         }
 
         var value = this.getTokenString(beginIndex);
@@ -204,14 +208,14 @@ export class Scanner extends Entity {
         switch (this.$.char) {
             case  96:  // `
                 this.next();
-                if(endType==Token.Type.TEMPLATE_TAIL){
+                if(endType==Token.TEMPLATE_TAIL){
                     this.$.tpl--;
                 }
                 return this.$.lastToken = this.createToken(endType, beginIndex-1);
             case 36:  // $
                 this.next();  // $
                 this.next();  // {
-                if(middleType==Token.Type.TEMPLATE_HEAD){
+                if(middleType==Token.TEMPLATE_HEAD){
                     this.$.tpl++;
                 }
                 return this.$.lastToken = this.createToken(middleType, beginIndex-1);
@@ -279,29 +283,28 @@ export class Scanner extends Entity {
     }
     scanToken() {
         this.skipComments();
-        var beginIndex = this.$.index;
-        if (this.isAtEndInternal())
-            return this.createToken(Token.Type.END_OF_FILE, beginIndex);
+        var beginIndex = this.mark();
 
+        if (this.isAtEndInternal())
+            return this.createToken(Token.END_OF_FILE, beginIndex);
         var code = this.$.char;
         this.next();
-
         switch (code) {
             case 123:  // {
-                return this.createToken(Token.Type.OPEN_CURLY, beginIndex);
+                return this.createToken(Token.OPEN_CURLY, beginIndex);
             case 125:  // }
                 if(this.$.tpl>0){
                     return this.nextTemplateLiteralTokenInternal();
                 }
-                return this.createToken(Token.Type.CLOSE_CURLY, beginIndex);
+                return this.createToken(Token.CLOSE_CURLY, beginIndex);
             case 40:  // (
-                return this.createToken(Token.Type.OPEN_PAREN, beginIndex);
+                return Token.OPEN_PAREN.new(this);
             case 41:  // )
-                return this.createToken(Token.Type.CLOSE_PAREN, beginIndex);
+                return this.createToken(Token.CLOSE_PAREN, beginIndex);
             case 91:  // [
-                return this.createToken(Token.Type.OPEN_SQUARE, beginIndex);
+                return this.createToken(Token.OPEN_SQUARE, beginIndex);
             case 93:  // ]
-                return this.createToken(Token.Type.CLOSE_SQUARE, beginIndex);
+                return this.createToken(Token.CLOSE_SQUARE, beginIndex);
             case 46:  // .
                 switch (this.$.char) {
                     case 46:  // .
@@ -309,7 +312,7 @@ export class Scanner extends Entity {
                         if (this.input.charCodeAt(this.$.index + 1) === 46) {
                             this.next();
                             this.next();
-                            return this.createToken(Token.Type.DOT_DOT_DOT, beginIndex);
+                            return this.createToken(Token.DOT_DOT_DOT, beginIndex);
                         }
                         break;
                     default:
@@ -317,31 +320,31 @@ export class Scanner extends Entity {
                             return this.scanNumberPostPeriod(beginIndex);
                 }
 
-                return this.createToken(Token.Type.PERIOD, beginIndex);
+                return this.createToken(Token.PERIOD, beginIndex);
             case 59:  // ;
-                return this.createToken(Token.Type.SEMI_COLON, beginIndex);
+                return this.createToken(Token.SEMI_COLON, beginIndex);
             case 44:  // ,
-                return this.createToken(Token.Type.COMMA, beginIndex);
+                return this.createToken(Token.COMMA, beginIndex);
             case 126:  // ~
-                return this.createToken(Token.Type.TILDE, beginIndex);
+                return this.createToken(Token.TILDE, beginIndex);
             case 63:  // ?
-                return this.createToken(Token.Type.QUESTION, beginIndex);
+                return this.createToken(Token.QUESTION, beginIndex);
             case 58:  // :
-                return this.createToken(Token.Type.COLON, beginIndex);
+                return this.createToken(Token.COLON, beginIndex);
             case 60:  // <
                 switch (this.$.char) {
                     case 60:  // <
                         this.next();
                         if (this.$.char === 61) {  // =
                             this.next();
-                            return this.createToken(Token.Type.LEFT_SHIFT_EQUAL, beginIndex);
+                            return this.createToken(Token.LEFT_SHIFT_EQUAL, beginIndex);
                         }
-                        return this.createToken(Token.Type.LEFT_SHIFT, beginIndex);
+                        return this.createToken(Token.LEFT_SHIFT, beginIndex);
                     case 61:  // =
                         this.next();
-                        return this.createToken(Token.Type.LESS_EQUAL, beginIndex);
+                        return this.createToken(Token.LESS_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.OPEN_ANGLE, beginIndex);
+                        return this.createToken(Token.OPEN_ANGLE, beginIndex);
                 }
             case 62:  // >
                 switch (this.$.char) {
@@ -350,132 +353,132 @@ export class Scanner extends Entity {
                         switch (this.$.char) {
                             case 61:  // =
                                 this.next();
-                                return this.createToken(Token.Type.RIGHT_SHIFT_EQUAL, beginIndex);
+                                return this.createToken(Token.RIGHT_SHIFT_EQUAL, beginIndex);
                             case 62:  // >
                                 this.next();
                                 if (this.$.char === 61) { // =
                                     this.next();
                                     return this.createToken(
-                                        Token.Type.UNSIGNED_RIGHT_SHIFT_EQUAL, beginIndex);
+                                        Token.UNSIGNED_RIGHT_SHIFT_EQUAL, beginIndex);
                                 }
-                                return this.createToken(Token.Type.UNSIGNED_RIGHT_SHIFT, beginIndex);
+                                return this.createToken(Token.UNSIGNED_RIGHT_SHIFT, beginIndex);
                             default:
-                                return this.createToken(Token.Type.RIGHT_SHIFT, beginIndex);
+                                return this.createToken(Token.RIGHT_SHIFT, beginIndex);
                         }
                     case 61:  // =
                         this.next();
-                        return this.createToken(Token.Type.GREATER_EQUAL, beginIndex);
+                        return this.createToken(Token.GREATER_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.CLOSE_ANGLE, beginIndex);
+                        return this.createToken(Token.CLOSE_ANGLE, beginIndex);
                 }
             case 61:  // =
                 if (this.$.char === 61) {  // =
                     this.next();
                     if (this.$.char === 61) {  // =
                         this.next();
-                        return this.createToken(Token.Type.EQUAL_EQUAL_EQUAL, beginIndex);
+                        return this.createToken(Token.EQUAL_EQUAL_EQUAL, beginIndex);
                     }
-                    return this.createToken(Token.Type.EQUAL_EQUAL, beginIndex);
+                    return this.createToken(Token.EQUAL_EQUAL, beginIndex);
                 }
                 if (this.$.char === 62 && this.options.arrowFunctions) {  // >
                     this.next();
-                    return this.createToken(Token.Type.ARROW, beginIndex);
+                    return this.createToken(Token.ARROW, beginIndex);
                 }
-                return this.createToken(Token.Type.EQUAL, beginIndex);
+                return this.createToken(Token.EQUAL, beginIndex);
             case 33:  // !
                 if (this.$.char === 61) {  // =
                     this.next();
                     if (this.$.char === 61) {  // =
                         this.next();
-                        return this.createToken(Token.Type.NOT_EQUAL_EQUAL, beginIndex);
+                        return this.createToken(Token.NOT_EQUAL_EQUAL, beginIndex);
                     }
-                    return this.createToken(Token.Type.NOT_EQUAL, beginIndex);
+                    return this.createToken(Token.NOT_EQUAL, beginIndex);
                 }
-                return this.createToken(Token.Type.BANG, beginIndex);
+                return this.createToken(Token.BANG, beginIndex);
             case 42:  // *
                 if (this.$.char === 61) {  // =
                     this.next();
-                    return this.createToken(Token.Type.STAR_EQUAL, beginIndex);
+                    return this.createToken(Token.STAR_EQUAL, beginIndex);
                 }
                 if (this.$.char === 42 && this.options.exponentiation) {
                     this.next();
                     if (this.$.char === 61) {  // =
                         this.next();
-                        return this.createToken(Token.Type.STAR_STAR_EQUAL, beginIndex);
+                        return this.createToken(Token.STAR_STAR_EQUAL, beginIndex);
                     }
-                    return this.createToken(Token.Type.STAR_STAR, beginIndex);
+                    return this.createToken(Token.STAR_STAR, beginIndex);
                 }
-                return this.createToken(Token.Type.STAR, beginIndex);
+                return this.createToken(Token.STAR, beginIndex);
             case 37:  // %
                 if (this.$.char === 61) {  // =
                     this.next();
-                    return this.createToken(Token.Type.PERCENT_EQUAL, beginIndex);
+                    return this.createToken(Token.PERCENT_EQUAL, beginIndex);
                 }
-                return this.createToken(Token.Type.PERCENT, beginIndex);
+                return this.createToken(Token.PERCENT, beginIndex);
             case 94:  // ^
                 if (this.$.char === 61) {  // =
                     this.next();
-                    return this.createToken(Token.Type.CARET_EQUAL, beginIndex);
+                    return this.createToken(Token.CARET_EQUAL, beginIndex);
                 }
-                return this.createToken(Token.Type.CARET, beginIndex);
+                return this.createToken(Token.CARET, beginIndex);
             case 47:  // /
                 if(this.$.regexp){
                     return this.scanRegexp(beginIndex)
                 }else{
                     if (this.$.char === 61) {  // =
                         this.next();
-                        return this.createToken(Token.Type.SLASH_EQUAL, beginIndex);
+                        return this.createToken(Token.SLASH_EQUAL, beginIndex);
                     }
-                    return this.createToken(Token.Type.SLASH, beginIndex);
+                    return this.createToken(Token.SLASH, beginIndex);
                 }
             case 43:  // +
                 switch (this.$.char) {
                     case 43:  // +
                         this.next();
-                        return this.createToken(Token.Type.PLUS_PLUS, beginIndex);
+                        return this.createToken(Token.PLUS_PLUS, beginIndex);
                     case 61: // =:
                         this.next();
-                        return this.createToken(Token.Type.PLUS_EQUAL, beginIndex);
+                        return this.createToken(Token.PLUS_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.PLUS, beginIndex);
+                        return this.createToken(Token.PLUS, beginIndex);
                 }
             case 45:  // -
                 switch (this.$.char) {
                     case 45: // -
                         this.next();
-                        return this.createToken(Token.Type.MINUS_MINUS, beginIndex);
+                        return this.createToken(Token.MINUS_MINUS, beginIndex);
                     case 61:  // =
                         this.next();
-                        return this.createToken(Token.Type.MINUS_EQUAL, beginIndex);
+                        return this.createToken(Token.MINUS_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.MINUS, beginIndex);
+                        return this.createToken(Token.MINUS, beginIndex);
                 }
             case 38:  // &
                 switch (this.$.char) {
                     case 38:  // &
                         this.next();
-                        return this.createToken(Token.Type.AND, beginIndex);
+                        return this.createToken(Token.AND, beginIndex);
                     case 61:  // =
                         this.next();
-                        return this.createToken(Token.Type.AMPERSAND_EQUAL, beginIndex);
+                        return this.createToken(Token.AMPERSAND_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.AMPERSAND, beginIndex);
+                        return this.createToken(Token.AMPERSAND, beginIndex);
                 }
             case 124:  // |
                 switch (this.$.char) {
                     case 124:  // |
                         this.next();
-                        return this.createToken(Token.Type.OR, beginIndex);
+                        return this.createToken(Token.OR, beginIndex);
                     case 61:  // =
                         this.next();
-                        return this.createToken(Token.Type.BAR_EQUAL, beginIndex);
+                        return this.createToken(Token.BAR_EQUAL, beginIndex);
                     default:
-                        return this.createToken(Token.Type.BAR, beginIndex);
+                        return this.createToken(Token.BAR, beginIndex);
                 }
             case 96:  // `
                 return this.scanTemplateStart(beginIndex);
             case 64:  // @
-                return this.createToken(Token.Type.AT, beginIndex);
+                return this.createToken(Token.AT, beginIndex);
 
             // TODO: add NumberToken
             // TODO: character following NumericLiteral must not be an
@@ -503,7 +506,7 @@ export class Scanner extends Entity {
         this.skipRegularExpressionBody();
         if (this.$.char !== 47) {  // /
             //this.reportError(`Expected '/' in regular expression literal got '${this.getTokenString(beginIndex)}'`);
-            return this.createToken(Token.Type.REGEXP, beginIndex)
+            return this.createToken(Token.REGEXP, beginIndex)
         }
         this.next();
 
@@ -511,7 +514,7 @@ export class Scanner extends Entity {
         while (Unicode.isIdPartChar(this.$.char)) {
             this.next();
         }
-        var token = this.createToken(Token.Type.REGEXP,beginIndex);
+        var token = this.createToken(Token.REGEXP,beginIndex);
         this.$.regexp = false;
         return token;
     }
@@ -535,7 +538,7 @@ export class Scanner extends Entity {
                     this.reportError('Hex Integer Literal must contain at least one digit');
                 }
                 this.skipHexDigits();
-                return this.createToken(Token.Type.NUMBER, beginIndex);
+                return this.createToken(Token.NUMBER, beginIndex);
 
             case 66:  // B
             case 98:  // b
@@ -547,7 +550,7 @@ export class Scanner extends Entity {
                     this.reportError('Binary Integer Literal must contain at least one digit');
                 }
                 this.skipBinaryDigits();
-                return  this.createToken(Token.Type.NUMBER, beginIndex);
+                return  this.createToken(Token.NUMBER, beginIndex);
 
             case 79:  // O
             case 111:  // o
@@ -559,7 +562,7 @@ export class Scanner extends Entity {
                     this.reportError('Octal Integer Literal must contain at least one digit');
                 }
                 this.skipOctalDigits();
-                return this.createToken(Token.Type.NUMBER, beginIndex);
+                return this.createToken(Token.NUMBER, beginIndex);
 
             case 48:  // 0
             case 49:  // 1
@@ -574,7 +577,7 @@ export class Scanner extends Entity {
                 return this.scanPostDigit(beginIndex);
         }
 
-        return  this.createToken(Token.Type.NUMBER, beginIndex);
+        return  this.createToken(Token.NUMBER, beginIndex);
     }
     createToken(type,index,value) {
         return new Token({
@@ -609,7 +612,7 @@ export class Scanner extends Entity {
             this.reportError(
                 `Character code '${code}' is not a valid identifier start char`,
                 beginIndex);
-            return this.createToken(Token.Type.ERROR, beginIndex);
+            return this.createToken(Token.ERROR, beginIndex);
         }
 
         for (;;) {
@@ -624,7 +627,7 @@ export class Scanner extends Entity {
                 }
                 escapedCharCodes.push(code);
                 if (!Unicode.isIdPartChar(code))
-                    return this.createToken(Token.Type.ERROR, beginIndex);
+                    return this.createToken(Token.ERROR, beginIndex);
             } else {
                 break;
             }
@@ -640,12 +643,12 @@ export class Scanner extends Entity {
                 return String.fromCharCode(escapedCharCodes[i++]);
             });
         }
-        return this.createToken(Token.Type.IDENTIFIER,beginIndex,value);
+        return this.createToken(Token.IDENTIFIER,beginIndex,value);
     }
     scanStringLiteral(beginIndex, terminator) {
         while (this.peekStringLiteralChar(terminator)) {
             if (!this.skipStringLiteralChar()) {
-                return  this.createToken(Token.Type.STRING, beginIndex);
+                return  this.createToken(Token.STRING, beginIndex);
             }
         }
         if (this.$.char !== terminator) {
@@ -653,7 +656,7 @@ export class Scanner extends Entity {
         } else {
             this.next();
         }
-        return this.createToken(Token.Type.STRING, beginIndex);
+        return this.createToken(Token.STRING, beginIndex);
     }
     getTokenString(beginIndex) {
         return this.input.substring(beginIndex, this.$.index);
@@ -772,7 +775,7 @@ export class Scanner extends Entity {
             default:
                 break;
         }
-        return this.createToken(Token.Type.NUMBER, beginIndex);
+        return this.createToken(Token.NUMBER, beginIndex);
     }
     skipDecimalDigits() {
         while (Unicode.isDecimalDigit(this.$.char)) {

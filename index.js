@@ -8,6 +8,6 @@ Module._resolveFilename = function(request, parent) {
 var traceur = require('traceur');
 traceur.require.makeDefault(function(filename,module) {
     return filename.indexOf('e6')>=0;
-},{experimental:true,types:true,annotations:true});
+},{experimental:true,types:true,annotations:true,memberVariables:true});
 
-require('./tests/parser');
+require('./tests/compiler');

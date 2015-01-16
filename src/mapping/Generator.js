@@ -89,6 +89,11 @@ export class SourceMapGenerator {
         var original = Utils.getArg(aArgs, 'original', null);
         var source = Utils.getArg(aArgs, 'source', null);
         var name = Utils.getArg(aArgs, 'name', null);
+        if(original){
+            console.info(`M ${generated.line}:${generated.column} => ${original.line}:${original.column}`)
+        }else{
+            console.info(`M ${generated.line}:${generated.column}`)
+        }
 
         if (!this._skipValidation) {
             this.validateMapping(generated, original, source, name);

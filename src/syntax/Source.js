@@ -14,6 +14,7 @@
 
 import {Entity} from '../util/Entity';
 import {Unicode} from './Unicode';
+import Path from 'path';
 
 /**
  * A source file.
@@ -21,59 +22,87 @@ import {Unicode} from './Unicode';
  * Immutable.
  */
 export class Source extends Entity {
-  constructor(settings){
-    super(Source.merge({
-      lastLine    : 0,
-      lastOffset  : -1
-    },settings));
-  }
-  get name(){
-    return this.$.name
-  }
-  get content(){
-    return this.$.content
-  }
-  get table(){
-    Object.defineProperty(this,'table',{
-      value : ((source)=>{
-        var offsets = [0];
-        var k = 1;
-        for (var index = 0; index < source.length; index++) {
-          var code = source.charCodeAt(index);
-          if (Unicode.isLineTerminator(code)) {
-            if (code === 13) {  // \r
-              if(source.charCodeAt(index + 1) === 10){// \n
-                index++;
-              }
+    static get ID(){
+        if(!this.id){
+            this['id']=0;
+        }
+        return this['id']++;
+    }
+    constructor(settings) {
+        super(Source.merge({
+            id          :Source.ID,
+            content     :'',
+            lastLine    : 0,
+            lastOffset  : -1
+        }, settings));
+    }
+    get id(){
+        return this.$.id;
+    }
+    get name() {
+        return this.$.name
+    }
+    get content() {
+        return this.$.content
+    }
+    set content(v) {
+        this.$.content=v;
+    }
+    get table() {
+        Object.defineProperty(this, 'table', {
+            value: ((source)=> {
+                var offsets = [0];
+                var k = 1;
+                for (var index = 0; index < source.length; index++) {
+                    var code = source.charCodeAt(index);
+                    if (Unicode.isLineTerminator(code)) {
+                        if (code === 13) {  // \r
+                            if (source.charCodeAt(index + 1) === 10) {// \n
+                                index++;
+                            }
+                        }
+                        offsets[k++] = index;
+                    }
+                }
+                offsets[k++] = source.length;
+                return offsets;
+            })(this.content)
+        });
+        return this.table;
+    }
+    get ast():ModuleNode {
+        return this.$.ast;
+    }
+    set ast(v:ModuleNode) {
+        this.$.ast = v;
+    }
+    get dependencies(){
+        if(!this.$.dependencies){
+            this.$.dependencies = {};
+        }
+        return this.$.dependencies;
+    }
+    inspect(){
+        return '[SRC:'+this.id+':'+this.name+']';
+    }
+    getPosition(offset) {
+        if (offset <= 0) {
+            return {line: 1, column: 0}
+        } else {
+            var line, column;
+            for (line = 0; line < this.table.length; line++) {
+                if (offset <= this.table[line]) {
+                    break;
+                }
             }
-            offsets[k++] = index;
-          }
+            column = offset - this.table[line - 1];
+            return {line: line, column: line>1?column-1:column};
         }
-        offsets[k++] = source.length;
-        return offsets;
-      })(this.content)
-    });
-    return this.table;
-  }
-
-  getPosition(offset) {
-    if(offset<=0){
-      return {line:1,column:0}
-    }else{
-      var line,column;
-      for (line = 0; line < this.table.length; line++) {
-        if (offset <= this.table[line]) {
-          break;
+    }
+    getLocation(startOffset, endOffset) {
+        return {
+            start: this.getPosition(startOffset),
+            end: this.getPosition(endOffset)
         }
-      }
-      column = offset-this.table[line-1];
-      return {line:line,column:column};
     }
-  }
-  getLocation(startOffset, endOffset) {
-    return {
-      start :this.getPosition(startOffset),
-      end   :this.getPosition(endOffset)
-    }
-  }
 }

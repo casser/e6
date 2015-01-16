@@ -19,7 +19,6 @@ export class Entity {
             this.set($);
         }
     }
-    
     get $(){
         Object.defineProperty(this,'$',{
             enumerable   : false,
@@ -29,7 +28,6 @@ export class Entity {
         });
         return this.$;
     }
-    
     set(what,value){
         if(typeof what =='object') {
             for (var key in what) {
@@ -41,7 +39,6 @@ export class Entity {
         }
         return this;
     }
-    
     get(what){
         if(typeof what =='string'){
             return this.$[what];

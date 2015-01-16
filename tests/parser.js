@@ -30,7 +30,7 @@ class Main {
         if(tree){
             var visitor = new Visitor();
             visitor.visit(tree);
-            tree = tree.toXML();
+            tree = tree.toXML(0,true);
             Main.FS.writeFileSync(Main.SOURCE_TREE_XML,tree);
         }
         //Main.print(tree);

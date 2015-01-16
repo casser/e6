@@ -114,7 +114,7 @@ export class Builder extends Entity {
                 this.$.token = this.scanner.nextToken()
             }
         }
-        if(this.$.token.type==Token.Type.SLASH || this.$.token.type==Token.Type.SLASH_EQUAL){
+        if(this.$.token.type==Token.SLASH || this.$.token.type==Token.SLASH_EQUAL){
             if(this.stack.peek.node && this.stack.peek.type == Marker.START && this.stack.peek.node.name == 'RegexpExpression'){
                 this.scanner.regexp(true);
                 this.$.token = this.scanner.nextToken();

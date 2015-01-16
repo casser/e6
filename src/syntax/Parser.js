@@ -7,6 +7,9 @@ import {Builder}    from './Builder';
 export {Parser};
 
 class Parser extends Entity {
+    static parse(source,options):Boolean{
+        source.ast = new Parser({source,options}).parse();
+    }
     //<editor-fold desc="General">
     get options ():Options{
         return this.$.options;
@@ -45,9 +48,9 @@ class Parser extends Entity {
     }
     isSemi(){
         switch (this.token.type) {
-            case Token.Type.SEMI_COLON  :
-            case Token.Type.END_OF_FILE :
-            case Token.Type.CLOSE_CURLY : return true;
+            case Token.SEMI_COLON  :
+            case Token.END_OF_FILE :
+            case Token.CLOSE_CURLY : return true;
             default                     : return this.token.ltb;
         }
     }
@@ -84,9 +87,9 @@ class Parser extends Entity {
     }
     eatSemi() {
         switch (this.token.type) {
-            case Token.Type.SEMI_COLON  : return this.eat(Token.Type.SEMI_COLON);
-            case Token.Type.END_OF_FILE :
-            case Token.Type.CLOSE_CURLY : return;
+            case Token.SEMI_COLON  : return this.eat(Token.SEMI_COLON);
+            case Token.END_OF_FILE :
+            case Token.CLOSE_CURLY : return;
         }
         if (!this.token.ltb){
             this.error(`Semi-colon expected got '${this.token.type}' ${this.token.ltb}`);
@@ -104,17 +107,17 @@ class Parser extends Entity {
     //<editor-fold desc="Literals">
     parseIdentifier(){
         var marker = this.mark(Ast.Identifier);
-        this.eat(Token.Type.IDENTIFIER);
+        this.eat(Token.IDENTIFIER);
         return marker.done(Ast.Identifier);
     }
     //</editor-fold>
     //<editor-fold desc="Module">
     parseModule() {
         var marker = this.mark(Ast.Module);
-        while(!this.is(Token.Type.END_OF_FILE)) {
+        while(!this.is(Token.END_OF_FILE)) {
             switch (this.token.type) {
-                case Token.Type.IMPORT  : this.parseImportDeclaration(); break;
-                case Token.Type.EXPORT  : this.parseExportDeclaration(); break;
+                case Token.IMPORT  : this.parseImportDeclaration(); break;
+                case Token.EXPORT  : this.parseExportDeclaration(); break;
                 default                 : this.parseStatement();
             }
         }
@@ -122,57 +125,57 @@ class Parser extends Entity {
     }
     parseModuleSpecifier() {
         var marker = this.mark(Ast.ModuleSpecifier);
-        this.eat(Token.Type.STRING);
+        this.eat(Token.STRING);
         return marker.done(Ast.ModuleSpecifier);
     }
     //<editor-fold desc="Imports Parsing">
     parseImportDeclaration() {
         var marker = this.mark(Ast.ImportDeclaration);
-        this.eat(Token.Type.IMPORT);
-        if(this.is(Token.Type.STAR)){
+        this.eat(Token.IMPORT);
+        if(this.is(Token.STAR)){
             let marker = this.mark(Ast.NamespaceImport);
-            this.eat(Token.Type.STAR);
-            if(this.eatIf(Token.Type.AS)){
+            this.eat(Token.STAR);
+            if(this.eatIf(Token.AS)){
                 this.parseIdentifier();
             }
             marker.done(Ast.NamespaceImport);
-            if(this.eatIf(Token.Type.COMMA)) {
+            if(this.eatIf(Token.COMMA)) {
                 this.parseImportSpecifiers();
             }
         } else
-        if(this.is(Token.Type.IDENTIFIER)){
+        if(this.is(Token.IDENTIFIER)){
             let marker = this.mark(Ast.DefaultImport);
             this.parseIdentifier();
-            if(this.eatIf(Token.Type.AS)){
+            if(this.eatIf(Token.AS)){
                 this.parseIdentifier();
             }
             marker.done(Ast.DefaultImport);
-            if(this.eatIf(Token.Type.COMMA)) {
+            if(this.eatIf(Token.COMMA)) {
                 this.parseImportSpecifiers();
             }
         }else
-        if(this.is(Token.Type.OPEN_CURLY)) {
-            if(!this.is(Token.Type.CLOSE_CURLY)) {
+        if(this.is(Token.OPEN_CURLY)) {
+            if(!this.is(Token.CLOSE_CURLY)) {
                 this.parseImportSpecifiers();
             }
         }
-        this.eat(Token.Type.FROM);
+        this.eat(Token.FROM);
         this.parseModuleSpecifier();
         this.eatSemi();
         return marker.done(Ast.ImportDeclaration);
     }
     parseImportSpecifiers(){
-        this.eat(Token.Type.OPEN_CURLY);
+        this.eat(Token.OPEN_CURLY);
         this.parseImportSpecifier();
-        while (this.eatIf(Token.Type.COMMA)) {
+        while (this.eatIf(Token.COMMA)) {
             this.parseImportSpecifier();
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
     }
     parseImportSpecifier() {
         var marker = this.mark(Ast.ImportSpecifier);
         this.parseIdentifier();
-        if(this.eatIf(Token.Type.AS)){
+        if(this.eatIf(Token.AS)){
             this.parseIdentifier();
         }
         return marker.done(Ast.ImportSpecifier);
@@ -181,45 +184,45 @@ class Parser extends Entity {
     //<editor-fold desc="Export Parsing">
     parseExportDeclaration() {
         var marker = this.mark(Ast.ExportDeclaration);
-        this.eat(Token.Type.EXPORT);
-        if(this.is(Token.Type.VAR)){
+        this.eat(Token.EXPORT);
+        if(this.is(Token.VAR)){
             this.parseVariableStatement();
         } else
-        if(this.is(Token.Type.CONST)){
+        if(this.is(Token.CONST)){
             this.parseVariableStatement();
         } else
-        if(this.is(Token.Type.LET)){
+        if(this.is(Token.LET)){
             this.parseVariableStatement();
         } else
-        if(this.is(Token.Type.FUNCTION)){
+        if(this.is(Token.FUNCTION)){
             this.parseFunctionDeclaration();
         } else
-        if(this.is(Token.Type.CLASS)){
+        if(this.is(Token.CLASS)){
             this.parseClassDeclaration();
         } else
-        if(this.is(Token.Type.DEFAULT)){
+        if(this.is(Token.DEFAULT)){
             this.parseExportDefault();
         } else
-        if(this.is(Token.Type.STAR)){
+        if(this.is(Token.STAR)){
             let marker = this.mark(Ast.NamespaceExport);
-            this.eat(Token.Type.STAR);
-            if(this.eatIf(Token.Type.AS)){
+            this.eat(Token.STAR);
+            if(this.eatIf(Token.AS)){
                 this.parseIdentifier();
             }
             marker.done(Ast.NamespaceExport);
-            if(this.eatIf(Token.Type.COMMA)) {
+            if(this.eatIf(Token.COMMA)) {
                 this.parseExportSpecifiers();
             }
-            if(this.eatIf(Token.Type.FROM)){
+            if(this.eatIf(Token.FROM)){
                 this.parseModuleSpecifier();
             }
         } else
-        if(this.is(Token.Type.OPEN_CURLY)) {
+        if(this.is(Token.OPEN_CURLY)) {
             this.parseExportSpecifiers();
-            if(this.eatIf(Token.Type.FROM)){
+            if(this.eatIf(Token.FROM)){
                 this.parseModuleSpecifier();
             }
-            if(this.eatIf(Token.Type.FROM)){
+            if(this.eatIf(Token.FROM)){
                 this.parseModuleSpecifier();
             }
         }else{
@@ -229,17 +232,17 @@ class Parser extends Entity {
         return marker.done(Ast.ExportDeclaration);
     }
     parseExportSpecifiers() {
-        this.eat(Token.Type.OPEN_CURLY);
+        this.eat(Token.OPEN_CURLY);
         this.parseExportSpecifier();
-        while (this.eatIf(Token.Type.COMMA)) {
+        while (this.eatIf(Token.COMMA)) {
             this.parseExportSpecifier();
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
     }
     parseExportSpecifier() {
         var marker = this.mark(Ast.ExportSpecifier);
         this.parseIdentifier();
-        if(this.eatIf(Token.Type.AS)){
+        if(this.eatIf(Token.AS)){
             this.parseIdentifier();
         }
         return marker.done(Ast.ExportSpecifier);
@@ -250,30 +253,30 @@ class Parser extends Entity {
     parseStatement(){
         var marker = false,token=this.token.type;
         switch (token) {
-            case Token.Type.AT          : marker = this.parseAnnotations();          break;
+            case Token.AT          : marker = this.parseAnnotations();          break;
             // declarations
-            case Token.Type.CONST       :
-            case Token.Type.LET         :
-            case Token.Type.VAR         : marker = this.parseVariableDeclaration();  break;
-            case Token.Type.FUNCTION    : marker = this.parseFunctionDeclaration();  break;
-            case Token.Type.CLASS       : marker = this.parseClassDeclaration();     break;
-            case Token.Type.TRAIT       : marker = this.parseTraitDeclaration();     break;
-            case Token.Type.INTERFACE   : marker = this.parseInterfaceDeclaration(); break;
+            case Token.CONST       :
+            case Token.LET         :
+            case Token.VAR         : marker = this.parseVariableDeclaration();  break;
+            case Token.FUNCTION    : marker = this.parseFunctionDeclaration();  break;
+            case Token.CLASS       : marker = this.parseClassDeclaration();     break;
+            case Token.TRAIT       : marker = this.parseTraitDeclaration();     break;
+            case Token.INTERFACE   : marker = this.parseInterfaceDeclaration(); break;
             // statements
-            case Token.Type.IF          : marker = this.parseIfStatement();          break;
-            case Token.Type.FOR         : marker = this.parseForStatement();         break;
-            case Token.Type.SWITCH      : marker = this.parseSwitchStatement();      break;
-            case Token.Type.WHILE       : marker = this.parseWhileStatement();       break;
-            case Token.Type.DO          : marker = this.parseDoWhileStatement();     break;
-            case Token.Type.TRY         : marker = this.parseTryStatement();         break;
-            case Token.Type.WITH        : marker = this.parseWithStatement();        break;
-            case Token.Type.OPEN_CURLY  : marker = this.parseBlockStatement();       break;
-            case Token.Type.RETURN      : marker = this.parseReturnStatement();      break;
-            case Token.Type.BREAK       : marker = this.parseBreakStatement();       break;
-            case Token.Type.THROW       : marker = this.parseThrowStatement();       break;
-            case Token.Type.CONTINUE    : marker = this.parseContinueStatement();    break;
-            case Token.Type.DEBUGGER    : marker = this.parseDebuggerStatement();    break;
-            case Token.Type.SEMI_COLON  : marker = this.parseEmptyStatement();       break;
+            case Token.IF          : marker = this.parseIfStatement();          break;
+            case Token.FOR         : marker = this.parseForStatement();         break;
+            case Token.SWITCH      : marker = this.parseSwitchStatement();      break;
+            case Token.WHILE       : marker = this.parseWhileStatement();       break;
+            case Token.DO          : marker = this.parseDoWhileStatement();     break;
+            case Token.TRY         : marker = this.parseTryStatement();         break;
+            case Token.WITH        : marker = this.parseWithStatement();        break;
+            case Token.OPEN_CURLY  : marker = this.parseBlockStatement();       break;
+            case Token.RETURN      : marker = this.parseReturnStatement();      break;
+            case Token.BREAK       : marker = this.parseBreakStatement();       break;
+            case Token.THROW       : marker = this.parseThrowStatement();       break;
+            case Token.CONTINUE    : marker = this.parseContinueStatement();    break;
+            case Token.DEBUGGER    : marker = this.parseDebuggerStatement();    break;
+            case Token.SEMI_COLON  : marker = this.parseEmptyStatement();       break;
             // fall through expressions
             default                     : marker = this.parseExpressionStatement();  break;
         }
@@ -288,57 +291,57 @@ class Parser extends Entity {
     }
     parseBlockStatement(){
         var marker = this.mark(Ast.BlockStatement);
-        this.eat(Token.Type.OPEN_CURLY);
-        while(!this.is(Token.Type.CLOSE_CURLY)){
+        this.eat(Token.OPEN_CURLY);
+        while(!this.is(Token.CLOSE_CURLY)){
             this.parseStatement();
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
         return marker.done(Ast.BlockStatement);
     }
     parseIfStatement(){
         var marker = this.mark(Ast.IfStatement);
-        this.eat(Token.Type.IF);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.IF);
+        this.eat(Token.OPEN_PAREN);
         this.parseExpression();
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         this.parseStatement();
-        if(this.eatIf(Token.Type.ELSE)){
+        if(this.eatIf(Token.ELSE)){
             this.parseStatement();
         }
         return marker.done(Ast.IfStatement);
     }
     parseWithStatement(){
         var marker = this.mark(Ast.WithStatement);
-        this.eat(Token.Type.WITH);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.WITH);
+        this.eat(Token.OPEN_PAREN);
         this.parseExpression();
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         this.parseStatement();
         return marker.done(Ast.WithStatement);
     }
     parseWhileStatement(){
         var marker = this.mark(Ast.WhileStatement);
-        this.eat(Token.Type.WHILE);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.WHILE);
+        this.eat(Token.OPEN_PAREN);
         this.parseExpression();
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         this.parseStatement();
         return marker.done(Ast.WhileStatement);
     }
     parseDoWhileStatement(){
         var marker = this.mark(Ast.DoWhileStatement);
-        this.eat(Token.Type.DO);
+        this.eat(Token.DO);
         this.parseStatement();
-        this.eat(Token.Type.WHILE);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.WHILE);
+        this.eat(Token.OPEN_PAREN);
         this.parseExpression();
-        this.eat(Token.Type.CLOSE_PAREN);
-        this.eatIf(Token.Type.SEMI_COLON);
+        this.eat(Token.CLOSE_PAREN);
+        this.eatIf(Token.SEMI_COLON);
         return marker.done(Ast.DoWhileStatement);
     }
     parseReturnStatement(){
         var marker = this.mark(Ast.ReturnStatement);
-        this.eat(Token.Type.RETURN);
+        this.eat(Token.RETURN);
         if(!this.isSemi()){
             this.parseExpression();
         }
@@ -347,7 +350,7 @@ class Parser extends Entity {
     }
     parseThrowStatement(){
         var marker = this.mark(Ast.ThrowStatement);
-        this.eat(Token.Type.THROW);
+        this.eat(Token.THROW);
         if(!this.isSemi()){
             this.parseExpression();
         }
@@ -356,49 +359,49 @@ class Parser extends Entity {
     }
     parseBreakStatement(){
         var marker = this.mark(Ast.BreakStatement);
-        this.eat(Token.Type.BREAK);
+        this.eat(Token.BREAK);
         if(!this.isSemi()){
-            this.eatIf(Token.Type.IDENTIFIER);
+            this.eatIf(Token.IDENTIFIER);
         }
         this.eatSemi();
         return marker.done(Ast.BreakStatement);
     }
     parseContinueStatement(){
         var marker = this.mark(Ast.ContinueStatement);
-        this.eat(Token.Type.CONTINUE);
+        this.eat(Token.CONTINUE);
         if(!this.isSemi()){
-            this.eatIf(Token.Type.IDENTIFIER);
+            this.eatIf(Token.IDENTIFIER);
         }
         this.eatSemi();
         return marker.done(Ast.ContinueStatement);
     }
     parseDebuggerStatement(){
         var marker = this.mark(Ast.DebuggerStatement);
-        this.eat(Token.Type.DEBUGGER);
+        this.eat(Token.DEBUGGER);
         this.eatSemi();
         return marker.done(Ast.DebuggerStatement);
     }
     parseEmptyStatement(){
         var marker = this.mark(Ast.EmptyStatement);
-        this.eat(Token.Type.SEMI_COLON);
+        this.eat(Token.SEMI_COLON);
         return marker.done(Ast.EmptyStatement);
     }
     parseTryStatement(){
         var marker = this.mark(Ast.TryStatement)
-        this.eat(Token.Type.TRY);
+        this.eat(Token.TRY);
         this.parseBlockStatement();
-        if (this.is(Token.Type.CATCH)) {
+        if (this.is(Token.CATCH)) {
             var catchMarker =  this.mark(Ast.Catch)
-            this.eat(Token.Type.CATCH);
-            this.eat(Token.Type.OPEN_PAREN);
-            this.eat(Token.Type.IDENTIFIER);
-            this.eat(Token.Type.CLOSE_PAREN);
+            this.eat(Token.CATCH);
+            this.eat(Token.OPEN_PAREN);
+            this.eat(Token.IDENTIFIER);
+            this.eat(Token.CLOSE_PAREN);
             this.parseBlockStatement();
             catchMarker.done(Ast.Catch);
         }
-        if (this.is(Token.Type.FINALLY)) {
+        if (this.is(Token.FINALLY)) {
             var finallyMarker =  this.mark(Ast.Finally)
-            this.eat(Token.Type.FINALLY);
+            this.eat(Token.FINALLY);
             this.parseBlockStatement();
             finallyMarker.done(Ast.Finally);
         }
@@ -406,64 +409,64 @@ class Parser extends Entity {
     }
     parseSwitchStatement(){
         var marker = this.mark(Ast.SwitchStatement);
-        this.eat(Token.Type.SWITCH);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.SWITCH);
+        this.eat(Token.OPEN_PAREN);
         this.parseExpression();
-        this.eat(Token.Type.CLOSE_PAREN);
-        this.eat(Token.Type.OPEN_CURLY);
+        this.eat(Token.CLOSE_PAREN);
+        this.eat(Token.OPEN_CURLY);
         while(true){
-            if(this.is(Token.Type.CASE)){
+            if(this.is(Token.CASE)){
                 var caseMarker = this.mark(Ast.CaseClause);
-                this.eat(Token.Type.CASE);
+                this.eat(Token.CASE);
                 this.parseExpression();
-                this.eat(Token.Type.COLON);
+                this.eat(Token.COLON);
                 this.parseSwitchStatements();
                 caseMarker.done(Ast.CaseClause);
             } else
-            if(this.is(Token.Type.DEFAULT)){
+            if(this.is(Token.DEFAULT)){
                 var defaultMarker = this.mark(Ast.DefaultClause);
-                this.eat(Token.Type.DEFAULT);
-                this.eat(Token.Type.COLON);
+                this.eat(Token.DEFAULT);
+                this.eat(Token.COLON);
                 this.parseSwitchStatements();
                 defaultMarker.done(Ast.DefaultClause);
             }else{
                 break;
             }
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
         return marker.done(Ast.SwitchStatement);
     }
     parseSwitchStatements(){
         while (!this.isIn(
-            Token.Type.CASE,
-            Token.Type.DEFAULT,
-            Token.Type.CLOSE_CURLY,
-            Token.Type.END_OF_FILE
+            Token.CASE,
+            Token.DEFAULT,
+            Token.CLOSE_CURLY,
+            Token.END_OF_FILE
         )) {
             this.parseStatement()
         }
     }
     parseForStatement() {
         var marker = this.mark(Ast.ForStatement);
-        this.eat(Token.Type.FOR);
-        this.eat(Token.Type.OPEN_PAREN);
+        this.eat(Token.FOR);
+        this.eat(Token.OPEN_PAREN);
 
         this.parseForInHeader() ||
         this.parseForHeader()   ;
 
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         this.parseStatement();
         return marker.done(Ast.ForStatement);
     }
     parseForInHeader(){
         var marker = this.mark(Ast.ForSignature);
-        if(this.isIn(Token.Type.VAR,Token.Type.LET)){
+        if(this.isIn(Token.VAR,Token.LET)){
             this.parseVariableDeclaration();
         }else
-        if(!this.is(Token.Type.SEMI_COLON)){
+        if(!this.is(Token.SEMI_COLON)){
             this.parseExpression();
         }
-        if(this.eatIfAny(Token.Type.IN,Token.Type.OF)){
+        if(this.eatIfAny(Token.IN,Token.OF)){
             this.parseExpression();
             return marker.done(Ast.ForSignature)
         }else{
@@ -472,23 +475,23 @@ class Parser extends Entity {
     }
     parseForHeader(){
         var marker = this.mark(Ast.ForSignature);
-        if(this.isIn(Token.Type.VAR,Token.Type.LET)){
+        if(this.isIn(Token.VAR,Token.LET)){
             this.parseVariableDeclaration();
-            this.eat(Token.Type.SEMI_COLON)
+            this.eat(Token.SEMI_COLON)
         }else
-        if(!this.is(Token.Type.SEMI_COLON)){
+        if(!this.is(Token.SEMI_COLON)){
             this.parseExpression();
-            this.eat(Token.Type.SEMI_COLON)
+            this.eat(Token.SEMI_COLON)
         }else{
-            this.eat(Token.Type.SEMI_COLON)
+            this.eat(Token.SEMI_COLON)
         }
-        if(!this.is(Token.Type.SEMI_COLON)){
+        if(!this.is(Token.SEMI_COLON)){
             this.parseExpression();
-            this.eat(Token.Type.SEMI_COLON)
+            this.eat(Token.SEMI_COLON)
         }else{
-            this.eat(Token.Type.SEMI_COLON)
+            this.eat(Token.SEMI_COLON)
         }
-        if(!this.is(Token.Type.CLOSE_PAREN)){
+        if(!this.is(Token.CLOSE_PAREN)){
             this.parseExpression();
         }
         return marker.done(Ast.ForSignature)
@@ -499,9 +502,9 @@ class Parser extends Entity {
     parseVariableDeclaration(){
         var inFor = this.builder.in(Ast.ForSignature);
         var marker = this.mark(Ast.VariableDeclaration);
-        this.eatAny(Token.Type.VAR,Token.Type.CONST,Token.Type.LET);
+        this.eatAny(Token.VAR,Token.CONST,Token.LET);
         this.parseVariableDeclarator();
-        while(this.eatIf(Token.Type.COMMA)) {
+        while(this.eatIf(Token.COMMA)) {
             this.parseVariableDeclarator();
         }
         if(!inFor){
@@ -511,26 +514,31 @@ class Parser extends Entity {
     }
     parseVariableDeclarator() {
         var marker =this.mark(Ast.VariableDeclarator);
-        if (this.isIn(Token.Type.OPEN_SQUARE,Token.Type.OPEN_CURLY)) {
+        if (this.isIn(Token.OPEN_SQUARE,Token.OPEN_CURLY)) {
             this.parsePattern();
         } else {
             this.parseIdentifier();
-            if(this.eatIf(Token.Type.COLON)){
+            if(this.eatIf(Token.COLON)){
                 this.parseTypeAnnotation();
             }
         }
-        if(this.eatIf(Token.Type.EQUAL)){
-            this.parseAssignmentExpression();
+        if(this.eatIf(Token.EQUAL)){
+            this.parseInitializer();
         }
         return marker.done(Ast.VariableDeclarator);
+    }
+    parseInitializer(){
+        var marker = this.mark(Ast.Initializer);
+        this.parseAssignmentExpression();
+        return marker.done(Ast.Initializer)
     }
     //</editor-fold>
     //<editor-fold desc="Class Declaration">
     parseClassDeclaration(){
         var marker = this.mark(Ast.ClassDeclaration);
-        this.eat(Token.Type.CLASS);
+        this.eat(Token.CLASS);
         this.parseIdentifier();
-        if(this.eatIf(Token.Type.EXTENDS)){
+        if(this.eatIf(Token.EXTENDS)){
             this.parseIdentifier();
         }
         this.parseClassBody();
@@ -538,11 +546,11 @@ class Parser extends Entity {
     }
     parseClassBody(){
         var member,marker = this.mark(Ast.ClassBody);
-        this.eat(Token.Type.OPEN_CURLY);
-        while(!this.is(Token.Type.CLOSE_CURLY)){
+        this.eat(Token.OPEN_CURLY);
+        while(!this.is(Token.CLOSE_CURLY)){
             this.parseClassMember();
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
         return marker.done(Ast.ClassBody);
     }
     parseClassMember(){
@@ -560,10 +568,10 @@ class Parser extends Entity {
     }
     parseClassGetter(){
         var marker = this.mark(Ast.ClassGetter);
-        if(this.eatIf(Token.Type.GET)){
+        if(this.eatIf(Token.GET)){
             this.parseIdentifier();
             this.parseFormalSignature();
-            if(this.eatIf(Token.Type.ARROW)){
+            if(this.eatIf(Token.ARROW)){
                 this.parseAssignmentExpression();
             }else{
                 this.parseBlockStatement();
@@ -575,10 +583,10 @@ class Parser extends Entity {
     }
     parseClassSetter(){
         var marker = this.mark(Ast.ClassSetter);
-        if(this.eatIf(Token.Type.SET)){
+        if(this.eatIf(Token.SET)){
             this.parseIdentifier();
             this.parseFormalSignature();
-            if(this.eatIf(Token.Type.ARROW)){
+            if(this.eatIf(Token.ARROW)){
                 this.parseAssignmentExpression();
             }else{
                 this.parseBlockStatement();
@@ -591,9 +599,9 @@ class Parser extends Entity {
     parseClassMethod(){
         var marker = this.mark(Ast.ClassMethod);
         this.parseIdentifier();
-        if(this.is(Token.Type.OPEN_PAREN)){
+        if(this.is(Token.OPEN_PAREN)){
             this.parseFormalSignature();
-            if(this.eatIf(Token.Type.ARROW)){
+            if(this.eatIf(Token.ARROW)){
                 this.parseAssignmentExpression();
             }else{
                 this.parseBlockStatement();
@@ -606,10 +614,10 @@ class Parser extends Entity {
     parseClassField(){
         var marker = this.mark(Ast.ClassField);
         this.parseIdentifier();
-        if(this.eatIf(Token.Type.COLON)){
+        if(this.eatIf(Token.COLON)){
             this.parseTypeAnnotation();
         }
-        if(this.eatIf(Token.Type.EQUAL)){
+        if(this.eatIf(Token.EQUAL)){
             this.parseAssignmentExpression();
         }
         return marker.done(Ast.ClassField);
@@ -618,10 +626,10 @@ class Parser extends Entity {
         var marker = this.mark(Ast.Modifiers);
         var marked = false;
         while(this.isIn(
-            Token.Type.PUBLIC,
-            Token.Type.PROTECTED,
-            Token.Type.STATIC,
-            Token.Type.ASYNC
+            Token.PUBLIC,
+            Token.PROTECTED,
+            Token.STATIC,
+            Token.ASYNC
         )){
             marked = this.mark(Ast.Modifier);
             this.eat(this.token.type);
@@ -637,8 +645,8 @@ class Parser extends Entity {
     //<editor-fold desc="Function Declaration">
     parseFunctionDeclaration(){
         var marker = this.mark(Ast.FunctionDeclaration);
-        this.eat(Token.Type.FUNCTION);
-        if(this.is(Token.Type.IDENTIFIER)){
+        this.eat(Token.FUNCTION);
+        if(this.is(Token.IDENTIFIER)){
             this.parseIdentifier();
         }
         this.parseFormalSignature();
@@ -648,15 +656,15 @@ class Parser extends Entity {
     }
     parseFormalSignature(){
         var marker = this.mark(Ast.FormalSignature);
-        this.eat(Token.Type.OPEN_PAREN);
-        if(!this.is(Token.Type.CLOSE_PAREN)){
+        this.eat(Token.OPEN_PAREN);
+        if(!this.is(Token.CLOSE_PAREN)){
             this.parseFormalParameter();
-            while(this.eatIf(Token.Type.COMMA)){
+            while(this.eatIf(Token.COMMA)){
                 this.parseFormalParameter();
             }
         }
-        this.eat(Token.Type.CLOSE_PAREN);
-        if(this.eatIf(Token.Type.COLON)){
+        this.eat(Token.CLOSE_PAREN);
+        if(this.eatIf(Token.COLON)){
             this.parseTypeAnnotation();
         }
         return marker.done(Ast.FormalSignature);
@@ -665,7 +673,7 @@ class Parser extends Entity {
         var marker = this.mark(Ast.FormalParameter);
         this.parseAnnotations();
         this.parseIdentifier();
-        if(this.eatIf(Token.Type.COLON)){
+        if(this.eatIf(Token.COLON)){
             this.parseTypeAnnotation();
         }
         return marker.done(Ast.FormalParameter);
@@ -675,9 +683,9 @@ class Parser extends Entity {
     //<editor-fold desc="Expressions">
     parseExpression(){
         var expression = this.parseAssignmentExpression();
-        if(this.is(Token.Type.COMMA)){
+        if(this.is(Token.COMMA)){
             var sequence = this.mark(Ast.SequenceExpression);
-            while(this.eatIf(Token.Type.COMMA)){
+            while(this.eatIf(Token.COMMA)){
                 this.parseAssignmentExpression();
             }
             sequence.shift();
@@ -688,25 +696,25 @@ class Parser extends Entity {
     }
     parseAssignmentExpression(){
         var expression = this.parseConditional();
-        if(this.is(Token.Type.ARROW)){
+        if(this.is(Token.ARROW)){
             console.info(expression.node);
             expression.rollback();
             expression = this.parseArrowExpression();
         }else
         if(this.eatIfAny(
-            Token.Type.AMPERSAND_EQUAL,
-            Token.Type.BAR_EQUAL,
-            Token.Type.CARET_EQUAL,
-            Token.Type.EQUAL,
-            Token.Type.LEFT_SHIFT_EQUAL,
-            Token.Type.MINUS_EQUAL,
-            Token.Type.PERCENT_EQUAL,
-            Token.Type.PLUS_EQUAL,
-            Token.Type.RIGHT_SHIFT_EQUAL,
-            Token.Type.SLASH_EQUAL,
-            Token.Type.STAR_EQUAL,
-            Token.Type.STAR_STAR_EQUAL,
-            Token.Type.UNSIGNED_RIGHT_SHIFT_EQUAL
+            Token.AMPERSAND_EQUAL,
+            Token.BAR_EQUAL,
+            Token.CARET_EQUAL,
+            Token.EQUAL,
+            Token.LEFT_SHIFT_EQUAL,
+            Token.MINUS_EQUAL,
+            Token.PERCENT_EQUAL,
+            Token.PLUS_EQUAL,
+            Token.RIGHT_SHIFT_EQUAL,
+            Token.SLASH_EQUAL,
+            Token.STAR_EQUAL,
+            Token.STAR_STAR_EQUAL,
+            Token.UNSIGNED_RIGHT_SHIFT_EQUAL
         )){
             this.parseAssignmentExpression();
             expression = expression.collapse(Ast.BinaryExpression);
@@ -716,9 +724,9 @@ class Parser extends Entity {
     }
     parseConditional() {
         var condition = this.parseLogicalOR();
-        if (this.eatIf(Token.Type.QUESTION)) {
+        if (this.eatIf(Token.QUESTION)) {
             this.parseAssignmentExpression();
-            this.eat(Token.Type.COLON);
+            this.eat(Token.COLON);
             this.parseAssignmentExpression();
             condition.collapse(Ast.ConditionalExpression);
         }
@@ -726,7 +734,7 @@ class Parser extends Entity {
     }
     parseLogicalOR() {
         var left = this.parseLogicalAND();
-        while(this.eatIf(Token.Type.OR)) {
+        while(this.eatIf(Token.OR)) {
             this.parseLogicalAND();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -734,7 +742,7 @@ class Parser extends Entity {
     }
     parseLogicalAND() {
         var left = this.parseBitwiseOR();
-        while(this.eatIf(Token.Type.AND)) {
+        while(this.eatIf(Token.AND)) {
             this.parseBitwiseOR();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -742,7 +750,7 @@ class Parser extends Entity {
     }
     parseBitwiseOR() {
         var left = this.parseBitwiseXOR();
-        while(this.eatIf(Token.Type.BAR)) {
+        while(this.eatIf(Token.BAR)) {
             this.parseBitwiseXOR();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -750,7 +758,7 @@ class Parser extends Entity {
     }
     parseBitwiseXOR() {
         var left = this.parseBitwiseAND();
-        while(this.eatIf(Token.Type.CARET)) {
+        while(this.eatIf(Token.CARET)) {
             this.parseBitwiseAND();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -758,7 +766,7 @@ class Parser extends Entity {
     }
     parseBitwiseAND() {
         var left = this.parseEquality();
-        while(this.eatIf(Token.Type.AMPERSAND)) {
+        while(this.eatIf(Token.AMPERSAND)) {
             this.parseEquality();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -767,10 +775,10 @@ class Parser extends Entity {
     parseEquality() {
         var left = this.parseRelational();
         while(this.eatIfAny(
-            Token.Type.EQUAL_EQUAL,
-            Token.Type.NOT_EQUAL,
-            Token.Type.EQUAL_EQUAL_EQUAL,
-            Token.Type.NOT_EQUAL_EQUAL
+            Token.EQUAL_EQUAL,
+            Token.NOT_EQUAL,
+            Token.EQUAL_EQUAL_EQUAL,
+            Token.NOT_EQUAL_EQUAL
         )){
             this.parseRelational();
             left = left.collapse(Ast.BinaryExpression);
@@ -780,11 +788,11 @@ class Parser extends Entity {
     parseRelational() {
         var left = this.parseShiftExpression();
         while(this.eatIfAny(
-            Token.Type.OPEN_ANGLE,
-            Token.Type.CLOSE_ANGLE,
-            Token.Type.GREATER_EQUAL,
-            Token.Type.LESS_EQUAL,
-            Token.Type.INSTANCEOF
+            Token.OPEN_ANGLE,
+            Token.CLOSE_ANGLE,
+            Token.GREATER_EQUAL,
+            Token.LESS_EQUAL,
+            Token.INSTANCEOF
         )){
             this.parseShiftExpression();
             left = left.collapse(Ast.BinaryExpression);
@@ -794,9 +802,9 @@ class Parser extends Entity {
     parseShiftExpression() {
         var left = this.parseAdditiveExpression();
         while(this.eatIfAny(
-            Token.Type.LEFT_SHIFT,
-            Token.Type.RIGHT_SHIFT,
-            Token.Type.UNSIGNED_RIGHT_SHIFT
+            Token.LEFT_SHIFT,
+            Token.RIGHT_SHIFT,
+            Token.UNSIGNED_RIGHT_SHIFT
         )) {
             this.parseAdditiveExpression();
             left = left.collapse(Ast.BinaryExpression);
@@ -806,8 +814,8 @@ class Parser extends Entity {
     parseAdditiveExpression() {
         var left = this.parseMultiplicativeExpression();
         while (this.eatIfAny(
-            Token.Type.PLUS,
-            Token.Type.MINUS
+            Token.PLUS,
+            Token.MINUS
         )) {
             this.parseMultiplicativeExpression();
             left = left.collapse(Ast.BinaryExpression);
@@ -817,9 +825,9 @@ class Parser extends Entity {
     parseMultiplicativeExpression() {
         var left = this.parseExponentiationExpression();
         while (this.eatIfAny(
-            Token.Type.SLASH,
-            Token.Type.STAR,
-            Token.Type.PERCENT
+            Token.SLASH,
+            Token.STAR,
+            Token.PERCENT
         )) {
             this.parseExponentiationExpression();
             left = left.collapse(Ast.BinaryExpression);
@@ -828,7 +836,7 @@ class Parser extends Entity {
     }
     parseExponentiationExpression() {
         var left = this.parseUnaryExpression();
-        while (this.is(Token.Type.STAR_STAR)) {
+        while (this.is(Token.STAR_STAR)) {
             this.parseExponentiationExpression();
             left = left.collapse(Ast.BinaryExpression);
         }
@@ -836,16 +844,16 @@ class Parser extends Entity {
     }
     parseUnaryExpression(){
         if(this.isIn(
-            Token.Type.AWAIT,
-            Token.Type.DELETE,
-            Token.Type.VOID,
-            Token.Type.TYPEOF,
-            Token.Type.PLUS_PLUS,
-            Token.Type.MINUS_MINUS,
-            Token.Type.PLUS,
-            Token.Type.MINUS,
-            Token.Type.TILDE,
-            Token.Type.BANG
+            Token.AWAIT,
+            Token.DELETE,
+            Token.VOID,
+            Token.TYPEOF,
+            Token.PLUS_PLUS,
+            Token.MINUS_MINUS,
+            Token.PLUS,
+            Token.MINUS,
+            Token.TILDE,
+            Token.BANG
         )){
             var marker  = this.mark(Ast.UnaryExpression);
             this.eat(this.token.type);
@@ -859,8 +867,8 @@ class Parser extends Entity {
     parsePostfixExpression(){
         var operand = this.parseLeftExpression();
         while (this.eatIfAny(
-            Token.Type.PLUS_PLUS,
-            Token.Type.MINUS_MINUS
+            Token.PLUS_PLUS,
+            Token.MINUS_MINUS
         )) {
             operand = operand.collapse(Ast.PostfixExpression);
         }
@@ -869,102 +877,102 @@ class Parser extends Entity {
     parsePrimaryExpression() {
         var expression;
         switch (this.token.type) {
-            case Token.Type.TEMPLATE        :
-            case Token.Type.TEMPLATE_HEAD   : expression = this.parseTemplateExpression();      break;
-            case Token.Type.SLASH           : // parse as regexp
-            case Token.Type.SLASH_EQUAL     : expression = this.parseRegexpExpression();        break;
-            case Token.Type.TRUE            :
-            case Token.Type.FALSE           : expression = this.parseBooleanExpression();       break;
-            case Token.Type.NUMBER          : expression = this.parseNumberExpression();        break;
-            case Token.Type.STRING          : expression = this.parseStringExpression();        break;
-            case Token.Type.NULL            : expression = this.parseNullExpression();          break;
-            case Token.Type.NAN             : expression = this.parseNanExpression();           break;
-            case Token.Type.UNDEFINED       : expression = this.parseUndefinedExpression();     break;
-            case Token.Type.THIS            : expression = this.parseThisExpression();          break;
-            case Token.Type.SUPER           : expression = this.parseSuperExpression();          break;
-            case Token.Type.IDENTIFIER      : expression = this.parseIdentifier();              break;
-            case Token.Type.CLASS           : expression = this.parseClassExpression();         break;
-            case Token.Type.FUNCTION        : expression = this.parseFunctionExpression();      break;
-            case Token.Type.OPEN_SQUARE     : expression = this.parseArrayExpression();         break;
-            case Token.Type.OPEN_CURLY      : expression = this.parseObjectExpression();        break;
-            case Token.Type.OPEN_PAREN      : expression = this.parseParenExpression();         break;
-            case Token.Type.END_OF_FILE     : return this.error(`unexpected end of file`);
+            case Token.TEMPLATE        :
+            case Token.TEMPLATE_HEAD   : expression = this.parseTemplateExpression();      break;
+            case Token.SLASH           : // parse as regexp
+            case Token.SLASH_EQUAL     : expression = this.parseRegexpExpression();        break;
+            case Token.TRUE            :
+            case Token.FALSE           : expression = this.parseBooleanExpression();       break;
+            case Token.NUMBER          : expression = this.parseNumberExpression();        break;
+            case Token.STRING          : expression = this.parseStringExpression();        break;
+            case Token.NULL            : expression = this.parseNullExpression();          break;
+            case Token.NAN             : expression = this.parseNanExpression();           break;
+            case Token.UNDEFINED       : expression = this.parseUndefinedExpression();     break;
+            case Token.THIS            : expression = this.parseThisExpression();          break;
+            case Token.SUPER           : expression = this.parseSuperExpression();          break;
+            case Token.IDENTIFIER      : expression = this.parseIdentifier();              break;
+            case Token.CLASS           : expression = this.parseClassExpression();         break;
+            case Token.FUNCTION        : expression = this.parseFunctionExpression();      break;
+            case Token.OPEN_SQUARE     : expression = this.parseArrayExpression();         break;
+            case Token.OPEN_CURLY      : expression = this.parseObjectExpression();        break;
+            case Token.OPEN_PAREN      : expression = this.parseParenExpression();         break;
+            case Token.END_OF_FILE     : return this.error(`unexpected end of file`);
             default                         : return this.error(`unexpected token ${this.token.type}`);
         }
         return expression;
     }
     parseNumberExpression(){
         var marker = this.mark(Ast.NumberExpression);
-        this.eat(Token.Type.NUMBER);
+        this.eat(Token.NUMBER);
         return marker.done(Ast.NumberExpression);
     }
     parseStringExpression(){
         var marker = this.mark(Ast.StringExpression);
-        this.eat(Token.Type.STRING);
+        this.eat(Token.STRING);
         return marker.done(Ast.StringExpression);
     }
     parseBooleanExpression(){
         var marker = this.mark(Ast.BooleanExpression);
-        this.eatAny(Token.Type.TRUE,Token.Type.FALSE);
+        this.eatAny(Token.TRUE,Token.FALSE);
         return marker.done(Ast.BooleanExpression);
     }
     parseNullExpression(){
         var marker = this.mark(Ast.NullExpression);
-        this.eat(Token.Type.NULL);
+        this.eat(Token.NULL);
         return marker.done(Ast.NullExpression);
     }
     parseNanExpression(){
         var marker = this.mark(Ast.NanExpression);
-        this.eat(Token.Type.NAN);
+        this.eat(Token.NAN);
         return marker.done(Ast.NanExpression);
     }
     parseUndefinedExpression(){
         var marker = this.mark(Ast.UndefinedExpression);
-        this.eat(Token.Type.UNDEFINED);
+        this.eat(Token.UNDEFINED);
         return marker.done(Ast.UndefinedExpression);
     }
     parseThisExpression(){
         var marker= this.mark(Ast.ThisExpression);
-        this.eat(Token.Type.THIS);
+        this.eat(Token.THIS);
         return marker.done(Ast.ThisExpression);
     }
     parseSuperExpression(){
         var marker= this.mark(Ast.SuperExpression);
-        this.eat(Token.Type.SUPER);
+        this.eat(Token.SUPER);
         return marker.done(Ast.SuperExpression);
     }
     parseParenExpression(){
         var marker = this.mark(Ast.ParenExpression);
-        this.eat(Token.Type.OPEN_PAREN);
-        if(!this.is(Token.Type.CLOSE_PAREN)) {
-            if (this.is(Token.Type.DOT_DOT_DOT)) {
+        this.eat(Token.OPEN_PAREN);
+        if(!this.is(Token.CLOSE_PAREN)) {
+            if (this.is(Token.DOT_DOT_DOT)) {
                 this.parseRestParameter();
             } else {
                 this.parseAssignmentExpression();
-                while (this.eatIf(Token.Type.COMMA)) {
+                while (this.eatIf(Token.COMMA)) {
                     this.parseAssignmentExpression();
                 }
             }
         }
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         return marker.done(Ast.ParenExpression)
     }
     parseLeftExpression(inNew=false){
         var marker;
         do{
-            if(this.is(Token.Type.NEW)){
+            if(this.is(Token.NEW)){
                 marker  = this.parseNewExpression();
             }else
             if(!marker){
                 marker  = this.parsePrimaryExpression();
             }else
-            if(this.is(Token.Type.OPEN_PAREN) && !inNew){
+            if(this.is(Token.OPEN_PAREN) && !inNew){
                 marker  = this.parseCallExpression();
             }else
-            if(this.is(Token.Type.OPEN_SQUARE)){
+            if(this.is(Token.OPEN_SQUARE)){
                 marker  = this.parseSquareMemberExpression();
             }else
-            if(this.is(Token.Type.PERIOD)){
+            if(this.is(Token.PERIOD)){
                 marker  = this.parsePeriodMemberExpression();
             }else{
                 break;
@@ -974,9 +982,9 @@ class Parser extends Entity {
     }
     parseNewExpression(){
         var marker = this.mark(Ast.NewExpression);
-        this.eat(Token.Type.NEW);
+        this.eat(Token.NEW);
         this.parseLeftExpression(true);
-        if (this.is(Token.Type.OPEN_PAREN)) {
+        if (this.is(Token.OPEN_PAREN)) {
             this.parseArguments();
         }
         return marker.done(Ast.NewExpression);
@@ -990,9 +998,9 @@ class Parser extends Entity {
     }
     parseSquareMemberExpression(){
         var marker = this.mark(Ast.MemberExpression);
-        this.eat(Token.Type.OPEN_SQUARE);
+        this.eat(Token.OPEN_SQUARE);
         this.parseAssignmentExpression();
-        this.eat(Token.Type.CLOSE_SQUARE);
+        this.eat(Token.CLOSE_SQUARE);
         marker.done(Ast.MemberExpression)
         marker.shift();
 
@@ -1000,7 +1008,7 @@ class Parser extends Entity {
     }
     parsePeriodMemberExpression(){
         var marker = this.mark(Ast.MemberExpression);
-        this.eat(Token.Type.PERIOD);
+        this.eat(Token.PERIOD);
         this.parseIdentifier();
         marker.done(Ast.MemberExpression)
         marker.shift();
@@ -1008,37 +1016,39 @@ class Parser extends Entity {
     }
     parseArguments() {
         var marker = this.mark(Ast.Arguments);
-        this.eat(Token.Type.OPEN_PAREN);
-        if (!this.is(Token.Type.CLOSE_PAREN)) {
+        this.eat(Token.OPEN_PAREN);
+        if (!this.is(Token.CLOSE_PAREN)) {
             this.parseArgument();
-            while (this.eatIf(Token.Type.COMMA)) {
+            while (this.eatIf(Token.COMMA)) {
                 this.parseArgument();
             }
         }
-        this.eat(Token.Type.CLOSE_PAREN);
+        this.eat(Token.CLOSE_PAREN);
         return marker.done(Ast.Arguments);
     }
     parseArgument() {
-        if (this.is(Token.Type.DOT_DOT_DOT)){
+        var marker = this.mark(Ast.Argument);
+        if (this.is(Token.DOT_DOT_DOT)){
             return this.parseSpreadExpression();
         }
-        return this.parseAssignmentExpression();
+        this.parseAssignmentExpression();
+        return marker.done(Ast.Argument);
     }
     parseArrayExpression(){
         var marker = this.mark(Ast.ArrayLiteral);
-        this.eat(Token.Type.OPEN_SQUARE);
-        while(!this.is(Token.Type.CLOSE_SQUARE)){
+        this.eat(Token.OPEN_SQUARE);
+        while(!this.is(Token.CLOSE_SQUARE)){
             this.parseArrayElement();
-            if(!this.eatIf(Token.Type.COMMA)){
+            if(!this.eatIf(Token.COMMA)){
                 break;
             }
         }
-        this.eat(Token.Type.CLOSE_SQUARE);
+        this.eat(Token.CLOSE_SQUARE);
         return marker.done(Ast.ArrayLiteral);
     }
     parseArrayElement(){
         var marker = this.mark(Ast.ArrayElement);
-        if(!this.is(Token.Type.COMMA)){
+        if(!this.is(Token.COMMA)){
             this.parseAssignmentExpression();
         }
         marker.done(Ast.ArrayElement);
@@ -1046,20 +1056,20 @@ class Parser extends Entity {
     }
     parseObjectExpression(){
         var marker = this.mark(Ast.ObjectExpression);
-        this.eat(Token.Type.OPEN_CURLY);
-        while (this.is(Token.Type.IDENTIFIER)) {
+        this.eat(Token.OPEN_CURLY);
+        while (this.is(Token.IDENTIFIER)) {
             this.parseObjectProperty();
-            if (!this.eatIf(Token.Type.COMMA)){
+            if (!this.eatIf(Token.COMMA)){
                 break;
             }
         }
-        this.eat(Token.Type.CLOSE_CURLY);
+        this.eat(Token.CLOSE_CURLY);
         return marker.done(Ast.ObjectExpression);
     }
     parseObjectProperty(){
         var marker = this.mark(Ast.ObjectProperty);
-        this.eat(Token.Type.IDENTIFIER);
-        if(this.eatIf(Token.Type.COLON)){
+        this.eat(Token.IDENTIFIER);
+        if(this.eatIf(Token.COLON)){
             this.parseAssignmentExpression();
         }
         marker.done(Ast.ObjectProperty);
@@ -1068,8 +1078,8 @@ class Parser extends Entity {
     parseArrowExpression(){
         var marker = this.mark(Ast.ArrowExpression);
         this.parseFormalSignature();
-        this.eat(Token.Type.ARROW);
-        if(this.is(Token.Type.OPEN_CURLY)){
+        this.eat(Token.ARROW);
+        if(this.is(Token.OPEN_CURLY)){
             this.parseBlockStatement();
         }else{
             this.parseExpressionStatement();
@@ -1079,8 +1089,8 @@ class Parser extends Entity {
     }
     parseFunctionExpression(){
         var marker = this.mark(Ast.FunctionExpression);
-        this.eat(Token.Type.FUNCTION);
-        if(this.is(Token.Type.IDENTIFIER)){
+        this.eat(Token.FUNCTION);
+        if(this.is(Token.IDENTIFIER)){
             this.parseIdentifier();
         }
         this.parseFormalSignature();
@@ -1089,26 +1099,26 @@ class Parser extends Entity {
     }
     parseTemplateExpression() {
         var marker = this.mark(Ast.TemplateExpression);
-        if(this.is(Token.Type.TEMPLATE)){
-            this.eat(Token.Type.TEMPLATE);
+        if(this.is(Token.TEMPLATE)){
+            this.eat(Token.TEMPLATE);
         }else
-        if(this.eatIf(Token.Type.TEMPLATE_HEAD)){
+        if(this.eatIf(Token.TEMPLATE_HEAD)){
             do{
                 this.parseExpression();
-                if(this.is(Token.Type.TEMPLATE_MIDDLE)){
+                if(this.is(Token.TEMPLATE_MIDDLE)){
 
-                    this.eat(Token.Type.TEMPLATE_MIDDLE);
+                    this.eat(Token.TEMPLATE_MIDDLE);
                 }else
-                if(!this.is(Token.Type.TEMPLATE_TAIL)){
-                    this.eat(Token.Type.TEMPLATE_TAIL);
+                if(!this.is(Token.TEMPLATE_TAIL)){
+                    this.eat(Token.TEMPLATE_TAIL);
                 }
-            }while(!this.eatIf(Token.Type.TEMPLATE_TAIL));
+            }while(!this.eatIf(Token.TEMPLATE_TAIL));
         }
         return marker.done(Ast.TemplateExpression);
     }
     parseRegexpExpression() {
         var marker = this.mark(Ast.RegexpExpression);
-        this.eat(Token.Type.REGEXP);
+        this.eat(Token.REGEXP);
         return marker.done(Ast.RegexpExpression);
     }
     //</editor-fold>
@@ -1119,9 +1129,9 @@ class Parser extends Entity {
         return marker.done(Ast.TypeReference);
     }
     parseAnnotations(){
-        if(this.is(Token.Type.AT)) {
+        if(this.is(Token.AT)) {
             var marker = this.mark(Ast.Annotations);
-            while (this.is(Token.Type.AT)) {
+            while (this.is(Token.AT)) {
                 this.parseAnnotation();
             }
             return marker.done(Ast.Annotations);
@@ -1131,9 +1141,9 @@ class Parser extends Entity {
     }
     parseAnnotation(){
         var marker = this.mark(Ast.Annotation);
-        this.eat(Token.Type.AT);
+        this.eat(Token.AT);
         this.parseIdentifier();
-        if(this.is(Token.Type.OPEN_PAREN)){
+        if(this.is(Token.OPEN_PAREN)){
             this.parseArguments();
         }
         return marker.done(Ast.Annotation);

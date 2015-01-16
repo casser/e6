@@ -2,6 +2,7 @@ import {Node} from './Node'
 export class Ast {
     static get Annotation                   (){return AnnotationNode              ;}
     static get Annotations                  (){return AnnotationsNode             ;}
+    static get Argument                     (){return ArgumentNode                ;}
     static get Arguments                    (){return ArgumentsNode               ;}
     static get ArrayLiteral                 (){return ArrayLiteralNode            ;}
     static get ArrayElement                 (){return ArrayElementNode            ;}
@@ -38,6 +39,7 @@ export class Ast {
     static get FunctionExpression           (){return FunctionExpressionNode      ;}
     static get Identifier                   (){return IdentifierNode              ;}
     static get IfStatement                  (){return IfStatementNode             ;}
+    static get Initializer                  (){return InitializerNode             ;}
     static get ImportDeclaration            (){return ImportDeclarationNode       ;}
     static get ImportSpecifier              (){return ImportSpecifierNode         ;}
     static get MemberExpression             (){return MemberExpressionNode        ;}
@@ -73,8 +75,10 @@ export class Ast {
     static get WhileStatement               (){return WhileStatementNode          ;}
     static get WithStatement                (){return WithStatementNode           ;}
 }
+
 class AnnotationNode                        extends Node {}
 class AnnotationsNode                       extends Node {}
+class ArgumentNode                          extends Node {}
 class ArgumentsNode                         extends Node {}
 class ArrayLiteralNode                      extends Node {}
 class ArrayElementNode                      extends Node {}
@@ -111,6 +115,7 @@ class FunctionDeclarationNode               extends Node {}
 class FunctionExpressionNode                extends Node {}
 class IdentifierNode                        extends Node {}
 class IfStatementNode                       extends Node {}
+class InitializerNode                       extends Node {}
 class ImportDeclarationNode                 extends Node {}
 class ImportSpecifierNode                   extends Node {}
 class MemberExpressionNode                  extends Node {}
