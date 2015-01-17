@@ -1,6 +1,7 @@
 import {Entity} from '../util/Entity';
 import {Scanner} from './Scanner';
 import {Token} from './Token';
+import {Ast} from './Ast';
 
 class Marker extends Entity {
     static get START(){
@@ -115,7 +116,7 @@ export class Builder extends Entity {
             }
         }
         if(this.$.token.type==Token.SLASH || this.$.token.type==Token.SLASH_EQUAL){
-            if(this.stack.peek.node && this.stack.peek.type == Marker.START && this.stack.peek.node.name == 'RegexpExpression'){
+            if(this.stack.peek.node && this.stack.peek.type == Marker.START && this.stack.peek.node == Ast.RegexpExpression){
                 this.scanner.regexp(true);
                 this.$.token = this.scanner.nextToken();
             }
@@ -159,7 +160,7 @@ export class Builder extends Entity {
             )-1];
             delete this.$.token;
             return marker;
-        }else {
+        }else{
             this.error(`Expected token ${type} for token ${this.token.type}`);
         }
     }

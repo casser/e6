@@ -351,6 +351,12 @@ export class TokenType {
             range: [scanner.$.marker, scanner.$.index]
         })
     }
+    inspect(){
+        return this.toString();
+    }
+    toString(){
+        return this.name;
+    }
 }
 
 Token.init();

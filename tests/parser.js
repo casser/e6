@@ -1,9 +1,8 @@
-import {Scanner}       from '../src/syntax/Scanner';
-import {Parser}        from '../src/syntax/Parser';
-import {Options}       from '../src/Options';
-import {Source}        from '../src/syntax/Source';
-import {Visitor}        from '../src/syntax/Visitor';
-
+import {Scanner} from '../src/syntax/Scanner';
+import {Parser} from '../src/syntax/Parser';
+import {Options} from '../src/Options';
+import {Source} from '../src/syntax/Source';
+import {Visitor} from '../src/syntax/Visitor';
 
 class Main {
     static get FS(){
@@ -19,19 +18,14 @@ class Main {
         return Main.FS.readFileSync(Main.SOURCE_NAME,'utf8');
     }
     static parse(){
-        var parser = new Parser({
-            options     : new Options(),
-            source      : new Source({
-                name    : Main.SOURCE_NAME,
-                content : Main.SOURCE_FILE
-            })
-        });
-        var tree = parser.parse();
-        if(tree){
-            var visitor = new Visitor();
-            visitor.visit(tree);
-            tree = tree.toXML(0,true);
-            Main.FS.writeFileSync(Main.SOURCE_TREE_XML,tree);
+        var source = Parser.parse(new Source({
+            name    : Main.SOURCE_NAME,
+            content : Main.SOURCE_FILE
+        }));
+        if(source.ast){
+            PositionsValidator.validate(source);
+            console.info(source.ast.toXML(1,false,false));
+            Main.FS.writeFileSync(Main.SOURCE_TREE_XML,source.ast.toXML(0,true));
         }
         //Main.print(tree);
         //Main.write(tree);

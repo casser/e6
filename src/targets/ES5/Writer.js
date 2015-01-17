@@ -100,7 +100,7 @@ export class Writer extends Visitor {
             this.visit(init);
         }
     }
-    visitNewExpression(node:NewExpressionNode){
+    visitNewExpression(node:NewNode){
         this.write(node.get(Token.NEW));
         this.write(Token.WS);
         this.visit(node.children[1]);

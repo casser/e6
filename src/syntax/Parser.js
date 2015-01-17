@@ -8,7 +8,9 @@ export {Parser};
 
 class Parser extends Entity {
     static parse(source,options):Boolean{
-        source.ast = new Parser({source,options}).parse();
+        var parser = new Parser({source,options});
+        source.ast = parser.parse();
+        return source;
     }
     //<editor-fold desc="General">
     get options ():Options{
@@ -100,7 +102,7 @@ class Parser extends Entity {
     }
     parse():Boolean{
         if(this.parseModule()){
-            return this.builder.tree;
+            return this.builder.tree.build();
         }
     }
     //</editor-fold>

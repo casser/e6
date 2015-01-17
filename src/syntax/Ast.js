@@ -4,149 +4,180 @@ export class Ast {
     static get Annotations                  (){return AnnotationsNode             ;}
     static get Argument                     (){return ArgumentNode                ;}
     static get Arguments                    (){return ArgumentsNode               ;}
-    static get ArrayLiteral                 (){return ArrayLiteralNode            ;}
+    static get ArrayLiteral                 (){return ArrayNode            ;}
     static get ArrayElement                 (){return ArrayElementNode            ;}
-    static get ArrowExpression              (){return ArrowExpressionNode         ;}
-    static get BinaryExpression             (){return BinaryExpressionNode        ;}
-    static get BlockStatement               (){return BlockStatementNode          ;}
-    static get BreakStatement               (){return BreakStatementNode          ;}
-    static get BooleanExpression            (){return BooleanExpressionNode       ;}
-    static get CallExpression               (){return CallExpressionNode          ;}
-    static get CaseClause                   (){return CaseClauseNode              ;}
-    static get Catch                        (){return CatchNode                   ;}
+    static get ArrowExpression              (){return ArrowNode         ;}
+    static get BinaryExpression             (){return BinaryNode        ;}
+    static get BlockStatement               (){return BlockNode          ;}
+    static get BreakStatement               (){return BreakNode          ;}
+    static get BooleanExpression            (){return BooleanNode                 ;}
+    static get CallExpression               (){return CallNode          ;}
+    static get CaseClause                   (){return SwitchCaseNode              ;}
+    static get Catch                        (){return TryCatchNode                   ;}
     static get ClassBody                    (){return ClassBodyNode               ;}
     static get ClassDeclaration             (){return ClassDeclarationNode        ;}
     static get ClassField                   (){return ClassFieldNode              ;}
     static get ClassGetter                  (){return ClassGetterNode             ;}
     static get ClassMethod                  (){return ClassMethodNode             ;}
     static get ClassSetter                  (){return ClassSetterNode             ;}
-    static get ConditionalExpression        (){return ConditionalExpressionNode   ;}
-    static get ContinueStatement            (){return ContinueStatementNode       ;}
-    static get DebuggerStatement            (){return DebuggerStatementNode       ;}
+    static get ConditionalExpression        (){return ConditionalNode   ;}
+    static get ContinueStatement            (){return ContinueNode       ;}
+    static get DebuggerStatement            (){return DebuggerNode       ;}
     static get DefaultImport                (){return DefaultImportNode           ;}
     static get DefaultClause                (){return DefaultClauseNode           ;}
-    static get DoWhileStatement             (){return DoWhileStatementNode        ;}
-    static get EmptyStatement               (){return EmptyStatementNode          ;}
+    static get DoWhileStatement             (){return DoNode        ;}
+    static get EmptyStatement               (){return EmptyNode          ;}
     static get ExportDeclaration            (){return ExportDeclarationNode       ;}
     static get ExportSpecifier              (){return ExportSpecifierNode         ;}
-    static get ExpressionStatement          (){return ExpressionStatementNode     ;}
-    static get Finally                      (){return FinallyNode                 ;}
+    static get ExpressionStatement          (){return ExpressionNode     ;}
+    static get Finally                      (){return TryFinallyNode                 ;}
     static get ForSignature                 (){return ForSignatureNode            ;}
-    static get ForStatement                 (){return ForStatementNode            ;}
+    static get ForStatement                 (){return ForNode            ;}
     static get FormalParameter              (){return FormalParameterNode         ;}
     static get FormalSignature              (){return FormalSignatureNode         ;}
     static get FunctionDeclaration          (){return FunctionDeclarationNode     ;}
-    static get FunctionExpression           (){return FunctionExpressionNode      ;}
+    static get FunctionExpression           (){return ClosureNode      ;}
     static get Identifier                   (){return IdentifierNode              ;}
-    static get IfStatement                  (){return IfStatementNode             ;}
+    static get IfStatement                  (){return IfNode             ;}
     static get Initializer                  (){return InitializerNode             ;}
     static get ImportDeclaration            (){return ImportDeclarationNode       ;}
     static get ImportSpecifier              (){return ImportSpecifierNode         ;}
-    static get MemberExpression             (){return MemberExpressionNode        ;}
+    static get MemberExpression             (){return MemberNode        ;}
     static get Modifier                     (){return ModifierNode                ;}
     static get Modifiers                    (){return ModifiersNode               ;}
     static get Module                       (){return ModuleNode                  ;}
     static get ModuleSpecifier              (){return ModuleSpecifierNode         ;}
-    static get NanExpression                (){return NanExpressionNode           ;}
+    static get NanExpression                (){return NanNode           ;}
     static get NamespaceImport              (){return NamespaceImportNode         ;}
     static get NamespaceExport              (){return NamespaceExportNode         ;}
-    static get NewExpression                (){return NewExpressionNode           ;}
-    static get NullExpression               (){return NullExpressionNode          ;}
-    static get NumberExpression             (){return NumberExpressionNode        ;}
-    static get ObjectExpression             (){return ObjectExpressionNode        ;}
-    static get ObjectProperty               (){return ObjectPropertyNode          ;}
-    static get ParenExpression              (){return ParenExpressionNode         ;}
-    static get PostfixExpression            (){return PostfixExpressionNode       ;}
-    static get RegexpExpression             (){return RegexpExpressionNode        ;}
-    static get ReturnStatement              (){return ReturnStatementNode         ;}
-    static get SequenceExpression           (){return SequenceExpressionNode      ;}
-    static get StringExpression             (){return StringExpressionNode        ;}
-    static get SuperExpression              (){return SuperExpressionNode         ;}
-    static get SwitchStatement              (){return SwitchStatementNode         ;}
-    static get TemplateExpression           (){return TemplateExpressionNode      ;}
-    static get ThisExpression               (){return ThisExpressionNode          ;}
-    static get ThrowStatement               (){return ThrowStatementNode          ;}
-    static get TryStatement                 (){return TryStatementNode            ;}
+    static get NewExpression                (){return NewNode           ;}
+    static get NullExpression               (){return NullNode          ;}
+    static get NumberExpression             (){return NumberNode        ;}
+    static get ObjectExpression             (){return ObjectNode        ;}
+    static get ObjectProperty               (){return ObjectElementNode          ;}
+    static get ParenExpression              (){return ParenNode         ;}
+    static get PostfixExpression            (){return PostfixNode       ;}
+    static get RegexpExpression             (){return RegexpNode        ;}
+    static get ReturnStatement              (){return ReturnNode         ;}
+    static get SequenceExpression           (){return SequenceNode      ;}
+    static get StringExpression             (){return StringNode        ;}
+    static get SuperExpression              (){return SuperNode         ;}
+    static get SwitchStatement              (){return SwitchNode         ;}
+    static get TemplateExpression           (){return TemplateNode      ;}
+    static get ThisExpression               (){return ThisNode          ;}
+    static get ThrowStatement               (){return ThrowNode          ;}
+    static get TryStatement                 (){return TryNode            ;}
     static get TypeReference                (){return TypeReferenceNode           ;}
-    static get UnaryExpression              (){return UnaryExpressionNode         ;}
-    static get UndefinedExpression          (){return UndefinedExpressionNode     ;}
+    static get UnaryExpression              (){return UnaryNode         ;}
+    static get UndefinedExpression          (){return UndefinedNode     ;}
     static get VariableDeclaration          (){return VariableDeclarationNode     ;}
     static get VariableDeclarator           (){return VariableDeclaratorNode      ;}
-    static get WhileStatement               (){return WhileStatementNode          ;}
-    static get WithStatement                (){return WithStatementNode           ;}
+    static get WhileStatement               (){return WhileNode          ;}
+    static get WithStatement                (){return WithNode           ;}
 }
 
 class AnnotationNode                        extends Node {}
 class AnnotationsNode                       extends Node {}
-class ArgumentNode                          extends Node {}
-class ArgumentsNode                         extends Node {}
-class ArrayLiteralNode                      extends Node {}
-class ArrayElementNode                      extends Node {}
-class ArrowExpressionNode                   extends Node {}
-class BinaryExpressionNode                  extends Node {}
-class BlockStatementNode                    extends Node {}
-class BreakStatementNode                    extends Node {}
-class BooleanExpressionNode                 extends Node {}
-class CallExpressionNode                    extends Node {}
-class CaseClauseNode                        extends Node {}
-class CatchNode                             extends Node {}
+
 class ClassBodyNode                         extends Node {}
 class ClassDeclarationNode                  extends Node {}
 class ClassFieldNode                        extends Node {}
 class ClassGetterNode                       extends Node {}
 class ClassMethodNode                       extends Node {}
 class ClassSetterNode                       extends Node {}
-class ConditionalExpressionNode             extends Node {}
-class ContinueStatementNode                 extends Node {}
-class DebuggerStatementNode                 extends Node {}
+
 class DefaultImportNode                     extends Node {}
 class DefaultClauseNode                     extends Node {}
-class DoWhileStatementNode                  extends Node {}
-class EmptyStatementNode                    extends Node {}
 class ExportDeclarationNode                 extends Node {}
 class ExportSpecifierNode                   extends Node {}
-class ExpressionStatementNode               extends Node {}
-class FinallyNode                           extends Node {}
-class ForSignatureNode                      extends Node {}
-class ForStatementNode                      extends Node {}
 class FormalParameterNode                   extends Node {}
 class FormalSignatureNode                   extends Node {}
 class FunctionDeclarationNode               extends Node {}
-class FunctionExpressionNode                extends Node {}
-class IdentifierNode                        extends Node {}
-class IfStatementNode                       extends Node {}
+
 class InitializerNode                       extends Node {}
 class ImportDeclarationNode                 extends Node {}
 class ImportSpecifierNode                   extends Node {}
-class MemberExpressionNode                  extends Node {}
+
 class ModifierNode                          extends Node {}
 class ModifiersNode                         extends Node {}
 class ModuleNode                            extends Node {}
 class ModuleSpecifierNode                   extends Node {}
-class NanExpressionNode                     extends Node {}
 class NamespaceImportNode                   extends Node {}
 class NamespaceExportNode                   extends Node {}
-class NewExpressionNode                     extends Node {}
-class NullExpressionNode                    extends Node {}
-class NumberExpressionNode                  extends Node {}
-class ObjectExpressionNode                  extends Node {}
-class ObjectPropertyNode                    extends Node {}
-class ParenExpressionNode                   extends Node {}
-class PostfixExpressionNode                 extends Node {}
-class RegexpExpressionNode                  extends Node {}
-class ReturnStatementNode                   extends Node {}
-class SequenceExpressionNode                extends Node {}
-class StringExpressionNode                  extends Node {}
-class SuperExpressionNode                   extends Node {}
-class SwitchStatementNode                   extends Node {}
-class TemplateExpressionNode                extends Node {}
-class ThisExpressionNode                    extends Node {}
-class ThrowStatementNode                    extends Node {}
-class TryStatementNode                      extends Node {}
+
 class TypeReferenceNode                     extends Node {}
-class UnaryExpressionNode                   extends Node {}
-class UndefinedExpressionNode               extends Node {}
+
 class VariableDeclarationNode               extends Node {}
 class VariableDeclaratorNode                extends Node {}
-class WhileStatementNode                    extends Node {}
-class WithStatementNode                     extends Node {}
+
+
+
+// Statements
+class Statement                             extends Node {}
+class EmptyNode                             extends Statement {}
+class BreakNode                             extends Statement {}
+class ContinueNode                          extends Statement {}
+class DebuggerNode                          extends Statement {}
+class ThrowNode                             extends Statement {}
+class ReturnNode                            extends Statement {}
+class WhileNode                             extends Statement {}
+class DoNode                                extends Statement {}
+class WithNode                              extends Statement {}
+class SwitchNode                            extends Statement {}
+class SwitchCaseNode                        extends Node {}
+class SwitchDefaultNode                     extends Node {}
+class TryNode                               extends Statement {}
+class TryCatchNode                          extends Node {}
+class TryFinallyNode                        extends Node {}
+class IfNode                                extends Statement {}
+class ForNode                               extends Statement {}
+class ForSignatureNode                      extends Node {}
+class ExpressionNode                        extends Statement {}
+class BlockNode                             extends Statement {}
+
+// Expressions
+class Expression                            extends Node {}
+class ArrayNode                             extends Expression {}
+class ArrayElementNode                      extends Node {}
+class ObjectNode                            extends Expression {}
+class ObjectElementNode                     extends Node {}
+class TemplateNode                          extends Expression {}
+
+class MemberNode                            extends Expression {}
+
+class CallNode                              extends Expression {}
+class NewNode                               extends CallNode {}
+class ArgumentNode                          extends Node {}
+class ArgumentsNode                         extends Node {}
+
+class ArrowNode                             extends Expression {}
+class BinaryNode                            extends Expression {}
+class ConditionalNode                       extends Expression {}
+class ParenNode                             extends Expression {}
+class PostfixNode                           extends Expression {}
+class SequenceNode                          extends Expression {}
+class UnaryNode                             extends Expression {}
+class ClosureNode                           extends Expression {}
+
+// References
+class Reference                             extends Expression {} // Expression
+class IdentifierNode                        extends Reference {
+    get attributes(){
+        return {value:this.first.text}
+    }
+}
+class SuperNode                             extends Reference {}
+class ThisNode                              extends Reference {}
+// Literals
+class Literal                               extends Expression {
+    get attributes(){
+        return {value:this.first.text}
+    }
+} // Expression
+class BooleanNode                           extends Literal {}
+class NanNode                               extends Literal {}
+class NullNode                              extends Literal {}
+class NumberNode                            extends Literal {}
+class RegexpNode                            extends Literal {}
+class StringNode                            extends Literal {}
+class UndefinedNode                         extends Literal {}
