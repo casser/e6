@@ -3,13 +3,10 @@ import {Options}  from '../src/Options';
 
 class Main {
     static get SOURCE(){
-        return `${__dirname}/src/test.js`;
-    }
-    static get OUTPUT(){
-        return `${__dirname}/out/test.js`;
+        return `${__dirname}/project/package.json`;
     }
     static compile(){
-        Compiler.compile(Main.SOURCE,Main.OUTPUT);
+        Compiler.compile(Main.SOURCE);
     }
 }
 

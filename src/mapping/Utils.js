@@ -313,7 +313,7 @@ export class Utils {
             // aHaystack[mid] is less than our needle.
             if (mid - aLow > 1) {
                 // The element is in the lower half.
-                return recursiveSearch(aLow, mid, aNeedle, aHaystack, aCompare);
+                return Utils.recursiveSearch(aLow, mid, aNeedle, aHaystack, aCompare);
             }
             // The exact needle element was not found in this haystack. Determine if
             // we are in termination case (2) or (3) and return the appropriate thing.

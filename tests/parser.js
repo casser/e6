@@ -18,15 +18,19 @@ class Main {
         return Main.FS.readFileSync(Main.SOURCE_NAME,'utf8');
     }
     static parse(){
-        var source = Parser.parse(new Source({
-            name    : Main.SOURCE_NAME,
-            content : Main.SOURCE_FILE
-        }));
-        if(source.ast){
-            PositionsValidator.validate(source);
-            console.info(source.ast.toXML(1,false,false));
-            Main.FS.writeFileSync(Main.SOURCE_TREE_XML,source.ast.toXML(0,true));
+        try{
+            var source = Parser.parse(new Source({
+                name    : Main.SOURCE_NAME,
+                content : Main.SOURCE_FILE
+            }));
+            if(source.ast){
+                console.info(source.ast.toXML(1,false,false));
+                Main.FS.writeFileSync(Main.SOURCE_TREE_XML,source.ast.toXML(0,true));
+            }
+        }catch(e){
+            console.info(e.stack)
         }
+
         //Main.print(tree);
         //Main.write(tree);
     }

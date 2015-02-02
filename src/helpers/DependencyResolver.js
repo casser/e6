@@ -14,6 +14,6 @@ export class DependencyResolver extends Visitor {
         return this.$.dependencies;
     }
     visitModuleSpecifier(node:ModuleSpecifier){
-        this.dependencies[node.first.value]=true;
+        this.dependencies[node.value]=true;
     }
 }

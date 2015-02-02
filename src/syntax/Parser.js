@@ -1,20 +1,21 @@
-import {Entity}     from '../util/Entity';
-import {Options}    from '../Options';
-import {Scanner}    from './Scanner';
-import {Token}      from './Token';
-import {Ast}        from './Ast';
-import {Builder}    from './Builder';
+import {Entity} from '../util/Entity';
+import {Options} from '../Options';
+import {Scanner} from './Scanner';
+import {Token} from './Token';
+import {Ast} from './Ast';
+import {Builder} from './Builder';
 export {Parser};
 
 class Parser extends Entity {
-    static parse(source,options):Boolean{
-        var parser = new Parser({source,options});
+    static parse(source):Boolean{
+        var parser = new Parser(source);
         source.ast = parser.parse();
+        source.ast.source = source;
         return source;
     }
     //<editor-fold desc="General">
     get options ():Options{
-        return this.$.options;
+        return this.source.options;
     }
     get source  ():Source{
         return this.$.source;
@@ -22,14 +23,9 @@ class Parser extends Entity {
     get builder ():Builder{
         return this.$.builder;
     }
-    constructor({source,options}) {
-        super({
-            source,options,
-            builder : new Builder({
-                source,options,
-                parser:this
-            })
-        });
+    constructor(source) {
+        this.set('source',source);
+        this.set('builder',new Builder(this))
     }
     get token():Token{
         return this.builder.token;
@@ -103,6 +99,8 @@ class Parser extends Entity {
     parse():Boolean{
         if(this.parseModule()){
             return this.builder.tree.build();
+        }else{
+            console.info("FALSE")
         }
     }
     //</editor-fold>
@@ -111,6 +109,11 @@ class Parser extends Entity {
         var marker = this.mark(Ast.Identifier);
         this.eat(Token.IDENTIFIER);
         return marker.done(Ast.Identifier);
+    }
+    parseReference(){
+        var marker = this.mark(Ast.Reference);
+        this.eat(Token.IDENTIFIER);
+        return marker.done(Ast.Reference);
     }
     //</editor-fold>
     //<editor-fold desc="Module">
@@ -132,7 +135,7 @@ class Parser extends Entity {
     }
     //<editor-fold desc="Imports Parsing">
     parseImportDeclaration() {
-        var marker = this.mark(Ast.ImportDeclaration);
+        var simple,marker = this.mark(Ast.ImportDeclaration);
         this.eat(Token.IMPORT);
         if(this.is(Token.STAR)){
             let marker = this.mark(Ast.NamespaceImport);
@@ -161,7 +164,7 @@ class Parser extends Entity {
                 this.parseImportSpecifiers();
             }
         }
-        this.eat(Token.FROM);
+        this.eatIf(Token.FROM);
         this.parseModuleSpecifier();
         this.eatSemi();
         return marker.done(Ast.ImportDeclaration);
@@ -500,6 +503,11 @@ class Parser extends Entity {
     }
     //</editor-fold>
     //<editor-fold desc="Declarations">
+    parseName(){
+        var marker = this.mark(Ast.Name);
+        this.eat(Token.IDENTIFIER);
+        return marker.done(Ast.Name);
+    }
     //<editor-fold desc="Variable Declaration">
     parseVariableDeclaration(){
         var inFor = this.builder.in(Ast.ForSignature);
@@ -519,7 +527,7 @@ class Parser extends Entity {
         if (this.isIn(Token.OPEN_SQUARE,Token.OPEN_CURLY)) {
             this.parsePattern();
         } else {
-            this.parseIdentifier();
+            this.parseName();
             if(this.eatIf(Token.COLON)){
                 this.parseTypeAnnotation();
             }
@@ -537,14 +545,24 @@ class Parser extends Entity {
     //</editor-fold>
     //<editor-fold desc="Class Declaration">
     parseClassDeclaration(){
-        var marker = this.mark(Ast.ClassDeclaration);
+        var marker = this.mark(Ast.Class);
         this.eat(Token.CLASS);
-        this.parseIdentifier();
+        this.parseClassName();
         if(this.eatIf(Token.EXTENDS)){
-            this.parseIdentifier();
+            this.parseClassParent();
         }
         this.parseClassBody();
-        return marker.done(Ast.ClassDeclaration);
+        return marker.done(Ast.Class);
+    }
+    parseClassName(){
+        var marker = this.mark(Ast.ClassName);
+        this.parseName();
+        return marker.done(Ast.ClassName);
+    }
+    parseClassParent(){
+        var marker = this.mark(Ast.ClassParent);
+        this.parseTypeAnnotation();
+        return marker.done(Ast.ClassParent);
     }
     parseClassBody(){
         var member,marker = this.mark(Ast.ClassBody);
@@ -571,7 +589,7 @@ class Parser extends Entity {
     parseClassGetter(){
         var marker = this.mark(Ast.ClassGetter);
         if(this.eatIf(Token.GET)){
-            this.parseIdentifier();
+            this.parseName();
             this.parseFormalSignature();
             if(this.eatIf(Token.ARROW)){
                 this.parseAssignmentExpression();
@@ -586,7 +604,7 @@ class Parser extends Entity {
     parseClassSetter(){
         var marker = this.mark(Ast.ClassSetter);
         if(this.eatIf(Token.SET)){
-            this.parseIdentifier();
+            this.parseName();
             this.parseFormalSignature();
             if(this.eatIf(Token.ARROW)){
                 this.parseAssignmentExpression();
@@ -600,7 +618,7 @@ class Parser extends Entity {
     }
     parseClassMethod(){
         var marker = this.mark(Ast.ClassMethod);
-        this.parseIdentifier();
+        this.parseName();
         if(this.is(Token.OPEN_PAREN)){
             this.parseFormalSignature();
             if(this.eatIf(Token.ARROW)){
@@ -615,7 +633,7 @@ class Parser extends Entity {
     }
     parseClassField(){
         var marker = this.mark(Ast.ClassField);
-        this.parseIdentifier();
+        this.parseName();
         if(this.eatIf(Token.COLON)){
             this.parseTypeAnnotation();
         }
@@ -674,7 +692,7 @@ class Parser extends Entity {
     parseFormalParameter(){
         var marker = this.mark(Ast.FormalParameter);
         this.parseAnnotations();
-        this.parseIdentifier();
+        this.parseName();
         if(this.eatIf(Token.COLON)){
             this.parseTypeAnnotation();
         }
@@ -699,29 +717,57 @@ class Parser extends Entity {
     parseAssignmentExpression(){
         var expression = this.parseConditional();
         if(this.is(Token.ARROW)){
-            console.info(expression.node);
             expression.rollback();
             expression = this.parseArrowExpression();
         }else
-        if(this.eatIfAny(
-            Token.AMPERSAND_EQUAL,
-            Token.BAR_EQUAL,
-            Token.CARET_EQUAL,
-            Token.EQUAL,
-            Token.LEFT_SHIFT_EQUAL,
-            Token.MINUS_EQUAL,
-            Token.PERCENT_EQUAL,
-            Token.PLUS_EQUAL,
-            Token.RIGHT_SHIFT_EQUAL,
-            Token.SLASH_EQUAL,
-            Token.STAR_EQUAL,
-            Token.STAR_STAR_EQUAL,
-            Token.UNSIGNED_RIGHT_SHIFT_EQUAL
-        )){
+        if(this.eatIf(Token.EQUAL)){//=
             this.parseAssignmentExpression();
-            expression = expression.collapse(Ast.BinaryExpression);
+            expression = expression.collapse(Ast.AssignmentExpression);
+        }else
+        if(this.eatIf(Token.PLUS_EQUAL)){//+=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.SumAssignmentExpression);
+        }else
+        if(this.eatIf(Token.MINUS_EQUAL)){//-=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.SubAssignmentExpression);
+        }else
+        if(this.eatIf(Token.STAR_EQUAL)){//*=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.MulAssignmentExpression);
+        }else
+        if(this.eatIf(Token.SLASH_EQUAL)){///=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.DivAssignmentExpression);
+        }else
+        if(this.eatIf(Token.AMPERSAND_EQUAL)){//&=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.AndAssignmentExpression);
+        }else
+        if(this.eatIf(Token.BAR_EQUAL)){//|=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.OrAssignmentExpression);
+        }else
+        if(this.eatIf(Token.CARET_EQUAL)){//^=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.XorAssignmentExpression);
+        }else
+        if(this.eatIf(Token.LEFT_SHIFT_EQUAL)){//<<=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.LshAssignmentExpression);
+        }else
+        if(this.eatIf(Token.RIGHT_SHIFT_EQUAL)){//>>=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.RshAssignmentExpression);
+        }else
+        if(this.eatIf(Token.UNSIGNED_RIGHT_SHIFT_EQUAL)){//>>>=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.ZshAssignmentExpression);
+        }else
+        if(this.eatIf(Token.UNSIGNED_RIGHT_SHIFT_EQUAL)){//>>>=
+            this.parseAssignmentExpression();
+            expression = expression.collapse(Ast.ZshAssignmentExpression);
         }
-
         return expression;
     }
     parseConditional() {
@@ -815,12 +861,17 @@ class Parser extends Entity {
     }
     parseAdditiveExpression() {
         var left = this.parseMultiplicativeExpression();
-        while (this.eatIfAny(
-            Token.PLUS,
-            Token.MINUS
-        )) {
-            this.parseMultiplicativeExpression();
-            left = left.collapse(Ast.BinaryExpression);
+        while (true) {
+            if(this.eatIf(Token.PLUS)){
+                this.parseMultiplicativeExpression();
+                left = left.collapse(Ast.SumExpression);
+            }else
+            if(this.eatIf(Token.MINUS)){
+                this.parseMultiplicativeExpression();
+                left = left.collapse(Ast.SubExpression);
+            }else{
+                break;
+            }
         }
         return left;
     }

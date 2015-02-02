@@ -259,7 +259,7 @@ export class Token extends Entity {
         });
     }
     static isKeyword(type) {
-        return Token.KEYWORDS[type];
+        return (Token.KEYWORDS[type] instanceof TokenType)?Token.KEYWORDS[type]:null;
     }
     get lta() {
         return this.$.lta;
@@ -320,7 +320,12 @@ export class Token extends Entity {
                 throw new Error('not a literal');
         }
     }
-
+    constructor(settings){
+        super(settings);
+        if(!(this.type instanceof TokenType)){
+            throw new Error('not a token type')
+        }
+    }
     inspect() {
         return this.toString();
     }

@@ -13,8 +13,12 @@
 // limitations under the License.
 
 import {Entity} from '../util/Entity';
+import {Utils} from '../util/Utils';
 import {Unicode} from './Unicode';
+import {SourceMapGenerator} from '../mapping/Generator'
+
 import Path from 'path';
+import FS from 'fs';
 
 /**
  * A source file.
@@ -22,31 +26,62 @@ import Path from 'path';
  * Immutable.
  */
 export class Source extends Entity {
-    static get ID(){
-        if(!this.id){
-            this['id']=0;
-        }
-        return this['id']++;
-    }
     constructor(settings) {
         super(Source.merge({
-            id          :Source.ID,
-            content     :'',
             lastLine    : 0,
             lastOffset  : -1
         }, settings));
     }
-    get id(){
-        return this.$.id;
+    get isMain(){
+        return this.get('main',false);
+    }
+    get options(){
+        return this.get('options',this.project.options);
+    }
+    get project(){
+        return this.get('project');
+    }
+    get sourcePath(){
+        return this.get('sourcePath',Path.resolve(this.project.sourceRoot,this.name));
+    }
+    get sourceDir(){
+        return Path.dirname(this.sourcePath);
+    }
+    get outputName(){
+        return Path.basename(this.name,'.js')+'.out.js';
+    }
+    get outputPath(){
+        return this.get('outputPath',Path.resolve(this.project.outputRoot,this.outputName));
+    }
+    get outputDir(){
+        return Path.dirname(this.outputPath);
+    }
+    get mapPath(){
+        return this.outputPath+'.map';
+    }
+    get mapFile(){
+        return Path.relative(this.outputDir,this.mapPath);
     }
     get name() {
-        return this.$.name
+        return this.get('name');
+    }
+    get map(){
+        if(!this.$.map){
+            this.$.map = new SourceMapGenerator({
+                file        : './'+Path.basename(this.outputName),
+                sourceRoot  : Path.relative(this.outputDir,this.sourceDir)
+            })
+        }
+        return this.$.map;
     }
     get content() {
-        return this.$.content
+        return this.get('content',FS.readFileSync(this.sourcePath,'utf8'));
     }
-    set content(v) {
-        this.$.content=v;
+    set output(v){
+        this.$.output=v;
+    }
+    get output(){
+        return this.$.output||'';
     }
     get table() {
         Object.defineProperty(this, 'table', {
@@ -76,14 +111,36 @@ export class Source extends Entity {
     set ast(v:ModuleNode) {
         this.$.ast = v;
     }
+    get children(){
+        return this.dependencies.map((dependency)=>{
+            return this.project.getSource(dependency)
+        })        
+    }
     get dependencies(){
-        if(!this.$.dependencies){
-            this.$.dependencies = {};
-        }
-        return this.$.dependencies;
+        return this.get('dependencies',()=>{
+            return this.ast.imports.map((dependency)=>{
+                return this.resolve(dependency);
+            })
+        })
     }
     inspect(){
-        return '[SRC:'+this.id+':'+this.name+']';
+        return 'Source('+this.name+')';
+    }
+    resolve(dependency){
+        if(dependency.indexOf('.')==0){
+            if(Path.extname(dependency)!='.js'){
+                dependency = dependency+'.js'
+            }
+            return Path.resolve(this.sourceDir,dependency);
+        }else{
+            return dependency;
+        }
+    }
+    write(){
+        Utils.makeDirectories(this.outputDir);
+        console.info(this.mapPath);
+        FS.writeFileSync(this.outputPath,this.output.toString(),'utf8');
+        FS.writeFileSync(this.mapPath,this.map.toString(),'utf8');
     }
     getPosition(offset) {
         if (offset <= 0) {

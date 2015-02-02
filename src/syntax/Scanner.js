@@ -17,22 +17,23 @@ import {Unicode} from './unicode.js';
 import {Token} from './Token.js';
 
 export class Scanner extends Entity {
-    constructor(settings) {
-        super(Scanner.merge({
+    constructor(source) {
+        this.set({
+            source           : source,
             index            : null,
             char             : null,
             currentToken     : null,
             lastToken        : null,
             lookaheadToken   : null,
             tpl              : 0
-        },settings));
+        });
         this.index = 0;
     }
     get reporter(){
-        return this.$.reporter;
+        return this.source.reporter;
     }
     get options(){
-        return this.$.options;
+        return this.source.options;
     }
     get parser(){
         return this.$.parser;
@@ -579,7 +580,7 @@ export class Scanner extends Entity {
 
         return  this.createToken(Token.NUMBER, beginIndex);
     }
-    createToken(type,index,value) {
+    createToken(type,index) {
         return new Token({
             type        : type,
             source      : this.source,
@@ -643,7 +644,7 @@ export class Scanner extends Entity {
                 return String.fromCharCode(escapedCharCodes[i++]);
             });
         }
-        return this.createToken(Token.IDENTIFIER,beginIndex,value);
+        return this.createToken(Token.IDENTIFIER,beginIndex);
     }
     scanStringLiteral(beginIndex, terminator) {
         while (this.peekStringLiteralChar(terminator)) {

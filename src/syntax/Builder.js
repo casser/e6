@@ -130,15 +130,10 @@ export class Builder extends Entity {
         return this.stack.peek
     }
     constructor({source,options,parser}) {
-        super({
-            source,options,parser,
-            stack       : [],
-            lookahead   : [],
-            scanner     : new Scanner({
-                source,options,parser,
-                builder:this
-            })
-        });
+        this.set('parser',parser);
+        this.set('stack',[]);
+        this.set('lookahead',[]);
+        this.set('scanner',new Scanner(source));
         Object.defineProperty(this.stack,'peek',{
             get:function(){
                 return this[this.length-1];

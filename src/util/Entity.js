@@ -14,7 +14,7 @@ export class Entity {
         }
         return result;
     }
-    constructor($){
+    constructor($={}){
         if($){
             this.set($);
         }
@@ -39,8 +39,15 @@ export class Entity {
         }
         return this;
     }
-    get(what){
-        if(typeof what =='string'){
+    get(what,value,...params){
+        if(typeof what == 'string'){
+            if(!this.$.hasOwnProperty(what) && value){
+                if(typeof value=='function'){
+                    this.set(what,value(...params));
+                }else{
+                    this.set(what,value);
+                }
+            }
             return this.$[what];
         }else{
             return this.$;

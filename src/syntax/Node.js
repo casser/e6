@@ -32,8 +32,26 @@ export class Node extends Entity {
     get attributes(){
         return false;
     }
+    get source(){
+        return (this.$.source || this.parent.source);
+    }
+    set source(v){
+        return this.$.source=v;
+    }
     get parent():Node{
         return this.$.parent;
+    }
+    set parent(v:Node){
+        this.$.parent = v;
+    }
+    get index():Number{
+        return this.$.index;
+    }
+    set index(v:Number){
+        this.$.index = v;
+    }
+    get length():Number{
+        return this.children.length;
     }
     get children():Array{
         if(!this.$.children){
@@ -45,19 +63,37 @@ export class Node extends Entity {
         return this.children[0];
     }
     get last():Node{
-        return this.children[this.children.length-1];
+        return this.children[this.length-1];
     }
+    get next():Node{
+        return this.parent.get(this.index+1);
+    }
+    get previous():Node{
+        return this.parent.get(this.index-1);
+    }
+
     get range(){
-        return [
-            this.first?this.first.range[0]:NaN,
-            this.last?this.last.range[1]:NaN
-        ];
+        return (this.$.range || [
+            this.first ?this.first.range[0]:NaN,
+            this.last  ?this.last.range[1]:NaN
+        ]);
     }
     get location(){
-        return {
+        return (this.$.location || {
             start   : this.first?this.first.location.start:NaN,
             end     : this.last?this.last.location.end:NaN
+        });
+    }
+    get text(){
+        if(!this.$.text){
+            this.$.text = this.source.content.substring(
+                this.range[0],this.range[1]
+            );
         }
+        return this.$.text;
+    }
+    get value(){
+        return this.text;
     }
     find(name) {
         var result = this.children.filter((child)=> {
@@ -82,7 +118,12 @@ export class Node extends Entity {
         }
     }
     add(child){
-        return (this.children.push(child),child);
+        child.parent = this;
+        child.index  = this.children.push(child)-1;
+        return child;
+    }
+    remove(){
+        array.splice(index, 1);
     }
     inspect(){
         return this.toString();
@@ -106,7 +147,7 @@ export class Node extends Entity {
         var sLoc = `${this.location.start.line}:${this.location.start.column}`;
         var eLoc = `${this.location.end.line}:${this.location.end.column}`;
         var loc  = positions?` pos="${this.range.join('-')}" loc="${sLoc}-${eLoc}"`:'';
-        var att  = this.attributes
+        var att  = this.attributes;
         if(att){
             var list = [];
             for(var key in att){
@@ -133,11 +174,21 @@ export class Node extends Entity {
         return lst.join('\n')
     }
     build(){
-        console.info(this.name)
-        for(var child of this.children){
+        this.$.range    = this.range;
+        this.$.location = this.location;
+        var children = this.children.filter((child)=>{
             if(child instanceof Node){
                 child.build();
+                return true;
+            }else{
+                return false;
             }
-        }
+        });
+        this.$.children = [];
+        children.forEach((child)=>{
+            this.add(child);
+        });
+
+        return this;
     }
 }
