@@ -5,7 +5,6 @@ export class Node extends Entity {
         return this;
     }
     static is(node,...types){
-
         for(var type of types){
             if(node instanceof Token){
                 return (node.type == type);
@@ -13,6 +12,9 @@ export class Node extends Entity {
             if(typeof type=='function'){
                 if(node.constructor == type){
                     return true;
+                }else
+                if(type.name==''){
+                    return type(node);
                 }
             }else
             if(typeof type=='string'){
@@ -74,8 +76,8 @@ export class Node extends Entity {
 
     get range(){
         return (this.$.range || [
-            this.first ?this.first.range[0]:NaN,
-            this.last  ?this.last.range[1]:NaN
+            this.first ? this.first.range[0]:NaN,
+            this.last  ? this.last.range[1]:NaN
         ]);
     }
     get location(){
@@ -104,7 +106,7 @@ export class Node extends Entity {
         }
         return result;
     }
-    get(name) {
+    get(name){
         if(typeof name=='number'){
             return this.children[name];
         }
@@ -118,12 +120,35 @@ export class Node extends Entity {
         }
     }
     add(child){
-        child.parent = this;
-        child.index  = this.children.push(child)-1;
-        return child;
+        if(Array.isArray(child)){
+            for(var c of child){
+                this.add(c);
+            }            
+        } else {
+            child.parent = this;
+            child.index  = this.children.push(child)-1;
+            return child;
+        }
     }
-    remove(){
-        array.splice(index, 1);
+    remove(child){
+        this.$.children = this.children.filter((c)=>{
+            return c!==child;
+        })
+    }
+    replace(child,replacement){
+        var children = [];
+        this.children.forEach((c)=>{
+            if(c===child){
+                if(Array.isArray(replacement)){
+                    children.push(...replacement)
+                }else{
+                    children.push(replacement)
+                }
+            }else{
+                children.push(c)
+            }
+        });
+        this.$.children = children;
     }
     inspect(){
         return this.toString();
@@ -188,7 +213,23 @@ export class Node extends Entity {
         children.forEach((child)=>{
             this.add(child);
         });
-
         return this;
+    }
+    normalize(){}
+    cache(name,init,...params){
+        if(!this.$.cache){
+            this.$.cache={}
+        }
+        if(!this.$.cache[name]){
+            this.$.cache[name] = init(...params);
+        }
+        return this.$.cache[name];
+    }
+    clear(name){
+        if(name){
+            delete this.$.cache[name];
+        }else{
+            this.$.cache;
+        }
     }
 }

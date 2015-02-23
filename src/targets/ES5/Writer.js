@@ -10,13 +10,14 @@ export class Writer extends Visitor {
         var sources = [];
         if(source.isMain){
             sources.push(new Writer().write(source));
-            console.info(source.output);
+            //console.info(source.output);
         }
     }
     get source():Source{
         return this.$.source
     }
     write(source){
+        
         this.set({
             line    : '',
             lines   : 1,
@@ -26,9 +27,9 @@ export class Writer extends Visitor {
             source  : source,
             exports : []
         });
-        this.out('E6("',this.source.project.options.name,'",function(E6){').NL;
+
         this.writeSource(this.source);
-        this.out("});").out('\n');
+
         this.out("//# sourceMappingURL=").out(this.source.mapFile).NL;
 
         this.source.write();
@@ -38,6 +39,7 @@ export class Writer extends Visitor {
         source.children.forEach((child)=>{
             this.writeSource(child);
         });
+        console.info(source.ast);
         this.visit(source.ast);
     }
     out(value,...other) {
@@ -140,22 +142,11 @@ export class Writer extends Visitor {
         return this;
     }
     visitModule(node:ModuleNode){
+        //node.normalize();
         this.out('/*',node.source.sourcePath,'*/').NL;
-
-        this.mapStart(node).out('E6("',node.specifier,'",function(E6){with(this){').NL;
+        this.mapStart(node).out('E6("',node.source.project.options.name,'/',node.specifier,'",function(E6){with(this){').NL;
         this.INC;
         this.visit(node.children);
-        if(this.$.exports.length){
-            this.out('E6.E(');
-            this.$.exports.forEach((item,index)=>{
-                if(index>0){
-                    this.out(',');
-                }
-                this.out('"').visit(item).out('"');
-            });
-            this.$.exports=[];
-            this.out(');').NL;
-        }
         this.DEC;
         this.out("}});").mapEnd(node).NL;
     }
@@ -166,27 +157,51 @@ export class Writer extends Visitor {
         this.mapStart(node).out("E6.I(").visit(node.specifier).out(");").mapEnd(node).NL;
     }
     visitExportDeclaration(node:ExportDeclarationNode){
-        this.$.exports.push(node.declaration.declarator);
-        this.visit(node.declaration);
+        //this.$.exports.push(node.declaration.declarator);
+        //this.visit(node.declaration);
     }
     visitName(node:NameNode){
         this.mapStart(node,node.text).out(node).mapEnd(node);
     }
-    visitClass(node:ClassNode){
+
+    visitFunctionExpression(node:FunctionExpressionNode){
+        this.mapStart(node).out('function').visit(node.signature).visit(node.body);
+    }
+    visitClassDeclaration(node:ClassDeclarationNode){
         //this.mapStart(node);
-        this.mapStart(node).out('E6.C(').out('"').visit(node.declarator).out('"').out(',function(E6){').NL;
+        this.mapStart(node).out('E6.C(').out('"').visit(node.nodeName).out('"').out(',function(E6){').NL;
         this.INC;
-        if(node.parentNode){
-            this.mapStart(node.parentNode).out('E6.P(').visit(node.parentType).out(')').mapEnd(node.parentNode).NL;
+        
+        if(node.nodeParent){
+            this.mapStart(node.nodeParent)
+                .out('E6.P(').visit(node.nodeParentType).out(');')
+            .mapEnd(node.nodeParent).NL;
         }else{
             this.out('E6.P(Object);').NL;
         }
-        this.visit(node.body);
+        
+        this.visit(node.nodeConstructor);
+        this.visit(node.nodeFields);
+        this.visit(node.nodeMethods);
+
+        this.visit(node.nodeStaticFields);
+        this.visit(node.nodeStaticMethods);
+        this.visit(node.nodeInitializer);
+        
         this.DEC;
         this.out('});').mapEnd(node).NL;
         //this.mapEnd(node);
     }
-    
+
+    visitClassConstructor(node:ClassConstructorNode){
+        //this.mapStart(node);
+        this.mapStart(node)
+            .out('E6.C(').out(node.modifiers.toString()).out(',function').visit(node.signature)
+                .visit(node.body)
+            .out(');')
+        .mapEnd(node).NL;
+        //this.mapEnd(node);
+    }
     visitClassMethod(node:ClassMethodNode){
         //this.mapStart(node);
         this.mapStart(node).out('E6.M(').out(node.modifiers.toString()).out(',');
@@ -204,7 +219,7 @@ export class Writer extends Visitor {
     visitClassField(node:ClassFieldNode){
         //this.mapStart(node);
         this.out('E6.F(').out(node.modifiers.toString()).out(',');
-        this.out('"').visit(node.declarator).out('"');
+        this.out('"').visit(node.nodeName).out('"');
         this.out(');').NL;
         //this.mapEnd(node);
     }
@@ -244,7 +259,7 @@ export class Writer extends Visitor {
     visitMemberExpression(node:MemberExpressionNode){
         this.visit(node.first).out('.').visit(node.last);
     }
-    visitExpression(node:MemberExpressionNode){
+    visitExpressionStatement(node:ExpressionStatementNode){
         //this.mapStart(node);
         this.visit(node.first).out(';').NL;
         //this.mapEnd(node);

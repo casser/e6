@@ -3,8 +3,8 @@ import {Options} from './Options'
 import {Project} from './Project'
 import {Parser} from './syntax/Parser'
 import {Source} from './syntax/Source'
-import {Translator} from './targets/ES5/Translator'
 import {Writer} from './targets/ES5/Writer'
+import {Transformer} from './targets/ES5/Transformer'
 
 
 import {DependencyResolver} from './helpers/DependencyResolver'
@@ -17,6 +17,7 @@ export class Compiler extends Entity {
         return new Compiler(options).compile();
     }
     constructor(options){
+        super(options)
         this.set('options',new Options(options));
         this.set('project',new Project(this));
     }
@@ -28,6 +29,9 @@ export class Compiler extends Entity {
     }
     compile(){
         this.project.compile();
+        Object.keys(this.project.sources).forEach((key)=>{
+            Transformer.transform(this.project.sources[key]);
+        });
         Object.keys(this.project.sources).forEach((key)=>{
             Writer.write(this.project.sources[key]);
         });

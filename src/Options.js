@@ -2,7 +2,7 @@ import FS from 'fs';
 import Path from 'path';
 export class Options {
     constructor(path) {
-        var options;
+        var options=path;
         if(typeof path=='string'){
             options = JSON.parse(FS.readFileSync(path,'utf8'));
             options.path = path;

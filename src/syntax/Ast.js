@@ -1,4 +1,5 @@
-import {Node} from './Node'
+import {Node}        from './Node';
+import {JST}        from './JST';
 import {ValueParser} from '../util/ValueParser';
 export class Ast {
     static get Annotation                   (){return AnnotationNode              ;}
@@ -21,12 +22,13 @@ export class Ast {
     static get CaseClause                   (){return SwitchCaseNode              ;}
     static get Catch                        (){return TryCatchNode                ;}
     static get ClassBody                    (){return ClassBodyNode               ;}
-    static get Class                        (){return ClassNode                   ;}
+    static get ClassDeclaration             (){return ClassDeclarationNode                   ;}
     static get ClassName                    (){return ClassNameNode               ;}
     static get ClassParent                  (){return ClassParentNode             ;}
     static get ClassField                   (){return ClassFieldNode              ;}
     static get ClassGetter                  (){return ClassGetterNode             ;}
     static get ClassMethod                  (){return ClassMethodNode             ;}
+    static get ClassConstructor             (){return ClassConstructorNode        ;}
     static get ClassSetter                  (){return ClassSetterNode             ;}
     static get ConditionalExpression        (){return ConditionalNode   ;}
     static get ContinueStatement            (){return ContinueNode       ;}
@@ -37,14 +39,14 @@ export class Ast {
     static get EmptyStatement               (){return EmptyNode          ;}
     static get ExportDeclaration            (){return ExportDeclarationNode       ;}
     static get ExportSpecifier              (){return ExportSpecifierNode         ;}
-    static get ExpressionStatement          (){return ExpressionNode     ;}
+    static get ExpressionStatement          (){return ExpressionStatementNode     ;}
     static get Finally                      (){return TryFinallyNode                 ;}
     static get ForSignature                 (){return ForSignatureNode            ;}
     static get ForStatement                 (){return ForNode            ;}
     static get FormalParameter              (){return ParameterNode         ;}
     static get FormalSignature              (){return SignatureNode         ;}
     static get FunctionDeclaration          (){return FunctionDeclarationNode     ;}
-    static get FunctionExpression           (){return ClosureNode      ;}
+    static get FunctionExpression           (){return FunctionExpressionNode      ;}
     static get Identifier                   (){return IdentifierNode              ;}
     static get IfStatement                  (){return IfNode             ;}
     static get Initializer                  (){return InitializerNode             ;}
@@ -54,6 +56,7 @@ export class Ast {
     static get Modifier                     (){return ModifierNode                ;}
     static get Modifiers                    (){return ModifiersNode               ;}
     static get Module                       (){return ModuleNode                  ;}
+    static get ModuleBlock                  (){return ModuleBlockNode         ;}
     static get ModuleSpecifier              (){return ModuleSpecifierNode         ;}
     static get NanExpression                (){return NanNode           ;}
     static get Name                         (){return NameNode         ;}
@@ -80,8 +83,8 @@ export class Ast {
     static get TypeReference                (){return TypeReferenceNode ;}
     static get UnaryExpression              (){return UnaryNode         ;}
     static get UndefinedExpression          (){return UndefinedNode     ;}
-    static get VariableDeclaration          (){return VariablesNode     ;}
-    static get VariableDeclarator           (){return VariableNode      ;}
+    static get VariableDeclarations         (){return VariableDeclarationsNode     ;}
+    static get VariableDeclaration          (){return VariableNode      ;}
     static get WhileStatement               (){return WhileNode          ;}
     static get WithStatement                (){return WithNode           ;}
 }
@@ -89,39 +92,131 @@ export class Ast {
 class AnnotationNode                        extends Node {}
 class AnnotationsNode                       extends Node {}
 
-class ClassNode                             extends Node {
-    get declarator(){
+class ClassDeclarationNode                  extends Node {
+    get nodeName():NameNode{
         return this.get(Ast.ClassName).get(Ast.Name)
     }
-    get body(){
+    get nodeBody():ClassBodyNode{
         return this.get(Ast.ClassBody);
     }
-    get parentNode(){
+    get nodeParent():ClassParentNode{
         return this.get(Ast.ClassParent)
     }
-    get parentType(){
-        return this.parentNode.get(Ast.TypeReference);
+    get nodeParentType():TypeReferenceNode{
+        return this.nodeParent.get(Ast.TypeReference);
     }
+    get nodeConstructor():ClassConstructorNode {
+        return this.nodeBody.get((node)=>{
+            if(Node.is(node,Ast.ClassConstructor)){
+                return !node.isStatic;
+            }
+        });
+    }
+    get nodeInitializer():ClassConstructorNode{
+        return this.nodeBody.get((node)=>{
+            if(Node.is(node,Ast.ClassConstructor)){
+                return node.isStatic;
+            }
+        });
+    }
+    get nodeFields():Array{
+        var staticFields = {};
+        var objectFields = {};
+        this.nodeBody.find(Ast.ClassField).forEach((field)=>{
+            this.nodeBody.remove(field);
+            var name   = field.nodeName.value;
+            var fields = field.isStatic ? staticFields:objectFields;
+            if(!fields[name]){
+                fields[name] = field
+            } else {
+                throw new Error('duplicate field definition');
+            }
+        });
+        this.nodeBody.find(Ast.ClassGetter).forEach((getter)=>{
+            this.nodeBody.remove(getter);
+            var name   = getter.nodeName.value;
+            var fields = getter.isStatic ? staticFields:objectFields;
+            if(!fields[name]){
+                fields[name] = new ClassFieldNode();
+                fields[name].add(getter.nodeName);
+                fields[name].add(getter.nodeName);
+            }
+            if(!fields[name].nodeGetter){
+                fields[name].add(getter);
+            }else{
+                throw new Error('duplicate getter definition');
+            }
+        });
+        this.nodeBody.find(Ast.ClassSetter).forEach((setter)=>{
+            this.nodeBody.remove(setter)
+            var name   = setter.nodeName.value;
+            var fields = setter.isStatic ? staticFields:objectFields;
+            if(!fields[name]){
+                fields[name] = new ClassFieldNode();
+            }
+            if(!fields[name].nodeSetter){
+                fields[name].add(setter);
+            }else{
+                throw new Error('duplicate setter definition');
+            }
+        });
+        Object.keys(staticFields).forEach((key)=>{
+            this.nodeBody.add(staticFields[key]);
+        });
+        Object.keys(objectFields).forEach((key)=>{
+            this.nodeBody.add(objectFields[key]);
+        });
+        return this.nodeBody.find(Ast.ClassField);
+    }
+    
 }
+
 class ClassMember                           extends Node{
-    get declarator(){
+    get nodeName():NameNode{
         return this.get(Ast.Name)
     }
-    get modifiers():ModifiersNode{
+    get nodeModifiers():ModifiersNode {
         var modifiers = this.get(Ast.Modifiers);
-        if(modifiers){
-            return modifiers.mask;
-        }else{
-            return 0;
+        if(!modifiers){
+            modifiers = new ModifiersNode();
         }
+        return modifiers;
+    }
+    get modifiers(){
+        return this.nodeModifiers.mask;
+    }
+    get isStatic(){
+        return this.nodeModifiers.isStatic;
+    }
+    get isPublic(){
+        return this.nodeModifiers.isPublic;
     }
 }
 class ClassNameNode                         extends Node {}
 class ClassParentNode                       extends Node {}
 class ClassBodyNode                         extends Node {}
 class ClassFieldNode                        extends ClassMember {
-
+    get nodeName(){
+        if(!super.nodeName){
+            if(this.nodeGetter){
+                return this.nodeGetter.nodeName
+            }
+            if(this.nodeSetter){
+                return this.nodeGetter.nodeName
+            }
+            throw new Error('unnamed class field');
+        }else{
+            return super.nodeName;
+        }
+    }
+    get nodeGetter(){
+        return this.cache('nodeGetter',()=>this.get(Ast.ClassGetter));
+    }
+    get nodeSetter(){
+        return this.cache('nodeSetter',()=>this.get(Ast.ClassSetter));
+    }
 }
+
 class ClassMethodNode                       extends ClassMember {
     get signature(){
         return this.get(Ast.FormalSignature)
@@ -129,7 +224,9 @@ class ClassMethodNode                       extends ClassMember {
     get body(){
         return this.get(Ast.BlockStatement)
     }
-    
+}
+class ClassConstructorNode                  extends ClassMethodNode {
+
 }
 class ClassGetterNode                       extends ClassMethodNode {}
 class ClassSetterNode                       extends ClassMethodNode {}
@@ -143,17 +240,25 @@ class ExportDeclarationNode                 extends Node {
     
 }
 class ExportSpecifierNode                   extends Node {}
-class ParameterNode                   extends Node {
+class ParameterNode                         extends Node {
     get declarator():NameNode{
         return this.get(Ast.Name);
     }
 }
-class SignatureNode                   extends Node {
+class SignatureNode                         extends Node {
     get parameters(){
         return this.find(Ast.FormalParameter);
     }
 }
-class FunctionDeclarationNode               extends Node {}
+class FunctionDeclarationNode               extends Node {
+    get signature(){
+        return this.get(Ast.FormalSignature)
+    }
+    get body(){
+        return this.get(Ast.BlockStatement)
+    }
+    
+}
 
 class InitializerNode                       extends Node {}
 class ImportDeclarationNode                 extends Node {
@@ -169,11 +274,17 @@ class ModifiersNode                         extends Node {
         var mask = 0;
         this.find(Ast.Modifier).forEach((mod)=>{
             switch(mod.value){
-                case 'static' : mask = mask | 1;break;
-                case 'public' : mask = mask | 2;break;
+                case 'static' : mask = mask | 1; break;
+                case 'public' : mask = mask | 2; break;
             }
         });
         return mask;
+    }
+    get isStatic(){
+        return (1 == (this.mask|1));
+    }
+    get isPublic(){
+        return (2 == (this.mask|2));
     }
 }
 class ModuleNode                            extends Node {
@@ -184,6 +295,33 @@ class ModuleNode                            extends Node {
         return this.find(Ast.ImportDeclaration).map((declaration)=>{
             return declaration.specifier.value;
         });
+    }
+    normalize(){
+        var variables=[],classes=[],functions=[],statements=[],imports=[],exports=[];
+        this.children.forEach(child=>{
+            switch(child.type){
+                case Ast.ExportDeclaration      :
+                    exports.push(child);
+                break;
+                case Ast.ImportDeclaration      :
+                    imports.push(child);
+                break;
+                case Ast.ClassDeclaration       :
+                    classes.push(child);
+                break;
+                case Ast.FunctionDeclaration    :
+                    functions.push(child);
+                break;
+                case Ast.VariableDeclarations   :
+                    variables.push(child);
+                break;
+                default                         : 
+                    statements.push(child)
+            }
+        });
+        console.info(statements)
+        var initializer = (JST.statement `E6.M(function(){${statements}});`);
+        this.$.children = [new ModuleBlockNode()]
     }
 }
 
@@ -213,11 +351,19 @@ class TryFinallyNode                        extends Node {}
 class IfNode                                extends Statement {}
 class ForNode                               extends Statement {}
 class ForSignatureNode                      extends Node {}
-class ExpressionNode                        extends Statement {}
+class ExpressionStatementNode               extends Statement {}
 class BlockNode                             extends Statement {}
+class ModuleBlockNode                       extends BlockNode{}
 // Definitions
-class VariablesNode                         extends Statement {}
-class VariableNode                          extends Definition {}
+class VariableDeclarationsNode              extends Statement {}
+class VariableNode                          extends Definition {
+    get nodeName(){
+        return this.get(Ast.Name)
+    }
+    get nodeInitializer():InitializerNode{
+        return this.get(Ast.Initializer);
+    }
+}
 // Expressions
 class Expression                            extends Node {}
 class ArrayNode                             extends Expression {}
@@ -247,7 +393,15 @@ class ParenNode                             extends Expression {}
 class PostfixNode                           extends Expression {}
 class SequenceNode                          extends Expression {}
 class UnaryNode                             extends Expression {}
-class ClosureNode                           extends Expression {}
+class FunctionExpressionNode                extends Expression {
+    get signature(){
+        return this.get(Ast.FormalSignature)
+    }
+    get body(){
+        return this.get(Ast.BlockStatement)
+    }
+    
+}
 
 // References
 class Reference                             extends Expression {} // Expression
@@ -270,10 +424,14 @@ class StringNode                            extends Literal {
     }
 }
 class NameNode                              extends Literal {
-
+    get value(){
+        return this.text;
+    }
 }
 class UndefinedNode                         extends Literal {}
 
 
 //Other 
 class ModuleSpecifierNode                   extends StringNode {}
+
+

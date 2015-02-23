@@ -18,6 +18,7 @@ import {Token} from './Token.js';
 
 export class Scanner extends Entity {
     constructor(source) {
+        super();
         this.set({
             source           : source,
             index            : null,

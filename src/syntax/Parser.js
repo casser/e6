@@ -3,9 +3,9 @@ import {Options} from '../Options';
 import {Scanner} from './Scanner';
 import {Token} from './Token';
 import {Ast} from './Ast';
+import {JST} from './JST';
 import {Builder} from './Builder';
-export {Parser};
-
+export {Parser}
 class Parser extends Entity {
     static parse(source):Boolean{
         var parser = new Parser(source);
@@ -24,6 +24,7 @@ class Parser extends Entity {
         return this.$.builder;
     }
     constructor(source) {
+        super();
         this.set('source',source);
         this.set('builder',new Builder(this))
     }
@@ -191,22 +192,19 @@ class Parser extends Entity {
         var marker = this.mark(Ast.ExportDeclaration);
         this.eat(Token.EXPORT);
         if(this.is(Token.VAR)){
-            this.parseVariableStatement();
+            this.parseVariableDeclaration();
         } else
         if(this.is(Token.CONST)){
-            this.parseVariableStatement();
+            this.parseVariableDeclaration();
         } else
         if(this.is(Token.LET)){
-            this.parseVariableStatement();
+            this.parseVariableDeclaration();
         } else
         if(this.is(Token.FUNCTION)){
             this.parseFunctionDeclaration();
         } else
         if(this.is(Token.CLASS)){
             this.parseClassDeclaration();
-        } else
-        if(this.is(Token.DEFAULT)){
-            this.parseExportDefault();
         } else
         if(this.is(Token.STAR)){
             let marker = this.mark(Ast.NamespaceExport);
@@ -222,7 +220,7 @@ class Parser extends Entity {
                 this.parseModuleSpecifier();
             }
         } else
-        if(this.is(Token.OPEN_CURLY)) {
+        if(this.is(Token.OPEN_CURLY)){
             this.parseExportSpecifiers();
             if(this.eatIf(Token.FROM)){
                 this.parseModuleSpecifier();
@@ -283,7 +281,7 @@ class Parser extends Entity {
             case Token.DEBUGGER    : marker = this.parseDebuggerStatement();    break;
             case Token.SEMI_COLON  : marker = this.parseEmptyStatement();       break;
             // fall through expressions
-            default                     : marker = this.parseExpressionStatement();  break;
+            default                : marker = this.parseExpressionStatement();  break;
         }
         marker.shift(Ast.Annotations);
         return marker;
@@ -511,7 +509,7 @@ class Parser extends Entity {
     //<editor-fold desc="Variable Declaration">
     parseVariableDeclaration(){
         var inFor = this.builder.in(Ast.ForSignature);
-        var marker = this.mark(Ast.VariableDeclaration);
+        var marker = this.mark(Ast.VariableDeclarations);
         this.eatAny(Token.VAR,Token.CONST,Token.LET);
         this.parseVariableDeclarator();
         while(this.eatIf(Token.COMMA)) {
@@ -520,10 +518,10 @@ class Parser extends Entity {
         if(!inFor){
             this.eatSemi();
         }
-        return marker.done(Ast.VariableDeclaration);
+        return marker.done(Ast.VariableDeclarations);
     }
     parseVariableDeclarator() {
-        var marker =this.mark(Ast.VariableDeclarator);
+        var marker =this.mark(Ast.VariableDeclaration);
         if (this.isIn(Token.OPEN_SQUARE,Token.OPEN_CURLY)) {
             this.parsePattern();
         } else {
@@ -535,7 +533,7 @@ class Parser extends Entity {
         if(this.eatIf(Token.EQUAL)){
             this.parseInitializer();
         }
-        return marker.done(Ast.VariableDeclarator);
+        return marker.done(Ast.VariableDeclaration);
     }
     parseInitializer(){
         var marker = this.mark(Ast.Initializer);
@@ -543,16 +541,16 @@ class Parser extends Entity {
         return marker.done(Ast.Initializer)
     }
     //</editor-fold>
-    //<editor-fold desc="Class Declaration">
+    //<editor-fold desc="ClassDeclaration Declaration">
     parseClassDeclaration(){
-        var marker = this.mark(Ast.Class);
+        var marker = this.mark(Ast.ClassDeclaration);
         this.eat(Token.CLASS);
         this.parseClassName();
         if(this.eatIf(Token.EXTENDS)){
             this.parseClassParent();
         }
         this.parseClassBody();
-        return marker.done(Ast.Class);
+        return marker.done(Ast.ClassDeclaration);
     }
     parseClassName(){
         var marker = this.mark(Ast.ClassName);
@@ -579,12 +577,32 @@ class Parser extends Entity {
         var member=false;
         member = member || this.parseClassGetter();
         member = member || this.parseClassSetter();
+        member = member || this.parseClassConstructor();
         member = member || this.parseClassMethod();
         member = member || this.parseClassField();
         member.shift(Ast.Modifiers);
         member.shift(Ast.Annotations);
         this.eatSemi();
         return member;
+    }
+    parseClassConstructor(){
+        var marker = this.mark(Ast.ClassConstructor);
+        if(this.is(Token.CONSTRUCTOR)){
+            this.eat(Token.CONSTRUCTOR);
+            if(this.is(Token.OPEN_PAREN)){
+                this.parseFormalSignature();
+                if(this.eatIf(Token.ARROW)){
+                    this.parseAssignmentExpression();
+                }else{
+                    this.parseBlockStatement();
+                }
+                return marker.done(Ast.ClassConstructor);
+            }else{
+                return marker.rollback();
+            }
+        }else{
+            return marker.rollback();
+        }
     }
     parseClassGetter(){
         var marker = this.mark(Ast.ClassGetter);
@@ -949,7 +967,7 @@ class Parser extends Entity {
             case Token.OPEN_SQUARE     : expression = this.parseArrayExpression();         break;
             case Token.OPEN_CURLY      : expression = this.parseObjectExpression();        break;
             case Token.OPEN_PAREN      : expression = this.parseParenExpression();         break;
-            case Token.END_OF_FILE     : return this.error(`unexpected end of file`);
+            case Token.END_OF_FILE     : return null;
             default                         : return this.error(`unexpected token ${this.token.type}`);
         }
         return expression;
@@ -1203,3 +1221,4 @@ class Parser extends Entity {
     }
     //</editor-fold>
 }
+JST.Parser = Parser;

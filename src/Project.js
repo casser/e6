@@ -46,6 +46,7 @@ export class Project extends Entity {
     }
     
     constructor(compiler:Compiler) {
+        super();
         this.set('compiler',compiler);
     }
     compile(){

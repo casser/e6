@@ -36,7 +36,7 @@ export class Source extends Entity {
         return this.get('main',false);
     }
     get options(){
-        return this.get('options',this.project.options);
+        return this.get('options',()=>this.project.options);
     }
     get project(){
         return this.get('project');
@@ -75,7 +75,7 @@ export class Source extends Entity {
         return this.$.map;
     }
     get content() {
-        return this.get('content',FS.readFileSync(this.sourcePath,'utf8'));
+        return this.get('content',()=>FS.readFileSync(this.sourcePath,'utf8'));
     }
     set output(v){
         this.$.output=v;

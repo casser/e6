@@ -69,7 +69,7 @@ class Marker extends Entity {
     }
     shift(type){
         if(type) {
-            if (this.left.node == type) {
+            if (this.left &&this.left.node == type) {
                 this.builder.shift(this);
             }
         }else{
@@ -93,7 +93,7 @@ export class Builder extends Entity {
         return this.$.source;
     }
     get options(){
-        return this.$.parser;
+        return this.$.options;
     }
     get parser(){
         return this.$.parser;
@@ -130,6 +130,7 @@ export class Builder extends Entity {
         return this.stack.peek
     }
     constructor({source,options,parser}) {
+        super({source,options,parser})
         this.set('parser',parser);
         this.set('stack',[]);
         this.set('lookahead',[]);
@@ -141,7 +142,7 @@ export class Builder extends Entity {
         })
     }
     in(node){
-        return this.parent.node==node;
+        return this.parent && this.parent.node==node;
     }
     eat(type:Function){
         if(this.token.type==type){
@@ -179,7 +180,9 @@ export class Builder extends Entity {
         return node;
     }
     left(marker:Marker):Marker{
-        return this.stack[marker.start.index-1].start;
+        if(this.stack[marker.start.index-1]){
+            return this.stack[marker.start.index-1].start;
+        }
     }
     right(marker:Marker):Marker{
         return this.stack[marker.end.index+1].end;

@@ -12,6 +12,7 @@ export class Token extends Entity {
     static CATCH                      :TokenType;
     static CLASS                      :TokenType;
     static CONST                      :TokenType;
+    static CONSTRUCTOR                :TokenType;
     static CONTINUE                   :TokenType;
     static DEBUGGER                   :TokenType;
     static DEFAULT                    :TokenType;
@@ -137,6 +138,7 @@ export class Token extends Entity {
             [1, 'CATCH'                       ,'catch'              ],
             [1, 'CLASS'                       ,'class'              ],
             [1, 'CONST'                       ,'const'              ],
+            [1, 'CONSTRUCTOR'                 ,'constructor'        ],
             [1, 'CONTINUE'                    ,'continue'           ],
             [1, 'DEBUGGER'                    ,'debugger'           ],
             [1, 'DEFAULT'                     ,'default'            ],
@@ -254,12 +256,12 @@ export class Token extends Entity {
             type = new TokenType(...type)
             Token[type.name]=type;
             if(type.type == 1) {
-                Token.KEYWORDS[type.text] = type;
+                Token.KEYWORDS['$'+type.text] = type;
             }
         });
     }
     static isKeyword(type) {
-        return (Token.KEYWORDS[type] instanceof TokenType)?Token.KEYWORDS[type]:null;
+        return Token.KEYWORDS['$'+type];
     }
     get lta() {
         return this.$.lta;
